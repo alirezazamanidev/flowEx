@@ -6,6 +6,9 @@ import { TypeOrmDbConfig } from './configs/typeorm.config';
 import { RedisModule } from './configs/redis.config';
 import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { WalletModule } from './modules/wallet/wallet.module';
+import { TransactionModule } from './modules/transaction/transaction.module';
+import { HttpModule } from './modules/http/http.module';
 
 @Module({
   imports: [
@@ -15,7 +18,10 @@ import { AuthModule } from './modules/auth/auth.module';
     }),
     RedisModule.forRoot(),
     AuthModule,
-    UserModule
+    UserModule,
+    WalletModule,
+    TransactionModule,
+    HttpModule
   ],
 })
 export class AppModule {}
