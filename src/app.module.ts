@@ -9,6 +9,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { WalletModule } from './modules/wallet/wallet.module';
 import { TransactionModule } from './modules/transaction/transaction.module';
 import { HttpCustomModule } from './modules/http/http.module';
+import { MarketModule } from './modules/market/market.module';
 
 @Module({
   imports: [
@@ -21,7 +22,8 @@ import { HttpCustomModule } from './modules/http/http.module';
     UserModule,
     WalletModule,
     TransactionModule,
-    HttpCustomModule
+    HttpCustomModule,
+    MarketModule
   ],
 })
 export class AppModule {}

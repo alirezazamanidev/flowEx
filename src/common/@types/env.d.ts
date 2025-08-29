@@ -2,6 +2,7 @@
 namespace NodeJS {
   interface ProcessEnv {
     APP_PORT: string;
+    MARKET_REFRESH_INTERVAL:number
     // Auth
     OTP_EXPIRATION_MINUTES: number;
     JWT_SECRET_KEY: string;
