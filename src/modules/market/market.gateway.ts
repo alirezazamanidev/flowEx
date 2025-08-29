@@ -1,11 +1,13 @@
 import {
+  ConnectedSocket,
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Server } from 'socket.io';
+import { Server,Socket } from 'socket.io';
 import { NobitexRealtimeService } from './services/nobitex.service';
 import { Logger } from '@nestjs/common';
 import { MarketService } from './services/market.service';
@@ -14,7 +16,8 @@ export class MarketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(MarketGateway.name);
   @WebSocketServer()
   server: Server;
-  constructor(private readonly marketService: MarketService) {}
+  constructor(private marketService:MarketService){}
+  
 
   handleConnection(client: any) {
     this.logger.log('client client connected');
@@ -23,7 +26,14 @@ export class MarketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.logger.log('client client disConnected');
   }
 
-  broadcastMarketUpdate(data: any) {
+  broadcastMarketOverview(data: any) {
     this.server.emit('marketUpdate', data);
   }
+  @SubscribeMessage('getOneCandle')
+  getOneCandle(@ConnectedSocket() client:Socket){
+    return this.marketService.getOneCandle('BTCUSDT','5',client)
+
+  }
+
+
 }

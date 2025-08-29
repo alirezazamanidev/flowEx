@@ -1,9 +1,12 @@
-export const  cryptoOrderBookchannels = [
-  'public:orderbook-BTCUSDT',
-  'public:orderbook-ETHUSDT',
-  'public:orderbook-XRPUSDT',
-  'public:orderbook-LTCUSDT',
-  'public:orderbook-ADAUSDT',
-  'public:orderbook-DOTUSDT',
-  'public:orderbook-SOLUSDT',
-  ];
+export const CryptoSymbolsUSD = [
+  'BTCUSDT',  // بیت کوین
+  'ETHUSDT',  // اتریوم
+  'BNBUSDT',  // بایننس کوین
+  'SOLUSDT',  // سولانا
+  'ADAUSDT',  // کاردانو
+  'XRPUSDT',  // ریپل
+  'DOGEUSDT', // دوج‌کوین
+  'DOTUSDT',  // پولکادات
+  'LTCUSDT',  // لایت‌کوین
+  'MATICUSDT' // پالیگان
+];
