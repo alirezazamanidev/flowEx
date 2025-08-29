@@ -58,11 +58,11 @@ export class TransactionService {
     if (!transaction)
       return `http://frontend.com/payments?status=failed`;
     if (transaction.status !== TransactionStatus.PENDING)
-      return `http://frontend.com/payments?status='success`;
+      return `http://frontend.com/payments?status=success`;
     if (status === 'NOK') {
       transaction.status = TransactionStatus.CANCELED;
       await this.dataSource.manager.save(transaction);
-      return `http://frontend.com/payments?status='canceled`;
+      return `http://frontend.com/payments?status=canceled`;
     }
     if (status === 'OK') {
       const { success } = await this.zarinPalService.verify(
@@ -73,8 +73,8 @@ export class TransactionService {
         transaction.status = TransactionStatus.COMPLETED;
         await this.dataSource.manager.save(transaction);
         //  charge wallet
-        await this.walletService.ChargeWallet(transaction.amount);
-        return `http://frontend.com/payments?status='canceled`;
+        await this.walletService.chargeWallet(transaction.amount,transaction.userId);
+        return `http://frontend.com/payments?status=completed`;
       }
     }
     return `http://frontend.com/payments?status=failed`;

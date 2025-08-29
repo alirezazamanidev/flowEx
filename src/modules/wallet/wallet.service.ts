@@ -34,11 +34,11 @@ export class WalletService {
 
   async deposit(depositDto: DepositDto) {
     const { amount } = depositDto;
-   
+
     return await this.dataSource.transaction(async (manager) => {
       const transaction = await this.transactionService.create(manager, {
         amount,
-        userId:this.request.user.id,
+        userId: this.request.user.id,
         type: TransactionType.DEPOSIT,
         status: TransactionStatus.PENDING,
         currency: 'IRR',
@@ -53,15 +53,23 @@ export class WalletService {
     });
   }
 
-  async ChargeWallet(amount: number) {
-    return await this.dataSource.transaction(async (manager) => {
-      const wallet = await this.getOrCreateWallet(
-        this.request.user.id,
-        'IRR',
-        manager,
-      );
-      wallet.balance += amount;
-      await manager.save(wallet);
-    });
-  }
+async chargeWallet(amount: number, userId: string): Promise<WalletEntity> {
+  return await this.dataSource.transaction(async (manager) => {
+    // دریافت یا ایجاد کیف پول USD
+    const wallet = await this.getOrCreateWallet(userId, 'USD', manager);
+
+    // تبدیل balance از string به number
+    const currentBalance = parseFloat(wallet.balance as any); // TypeORM numeric → string
+
+    // تبدیل ریال به USD
+    const usdAmount = parseFloat((amount / 100_000).toFixed(8));
+
+    // جمع و rounding
+    wallet.balance = parseFloat((currentBalance + usdAmount).toFixed(8));
+
+    // ذخیره والت
+    return await manager.save(wallet);
+  });
+}
+
 }
