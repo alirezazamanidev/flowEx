@@ -8,7 +8,7 @@ import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { WalletModule } from './modules/wallet/wallet.module';
 import { TransactionModule } from './modules/transaction/transaction.module';
-import { HttpModule } from './modules/http/http.module';
+import { HttpCustomModule } from './modules/http/http.module';
 
 @Module({
   imports: [
@@ -21,7 +21,7 @@ import { HttpModule } from './modules/http/http.module';
     UserModule,
     WalletModule,
     TransactionModule,
-    HttpModule
+    HttpCustomModule
   ],
 })
 export class AppModule {}
