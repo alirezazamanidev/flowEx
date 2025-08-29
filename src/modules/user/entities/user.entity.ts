@@ -1,3 +1,4 @@
+import { BaseEntity } from 'src/common/abstracts/baseEntity.abstract';
 import { TransactionEntity } from 'src/modules/transaction/entities/transaction.entity';
 import { WalletEntity } from 'src/modules/wallet/entities/wallet.entity';
 import {
@@ -10,9 +11,8 @@ import {
 } from 'typeorm';
 
 @Entity('user')
-export class UserEntity {
-  @PrimaryGeneratedColumn()
-  id: string;
+export class UserEntity extends BaseEntity {
+
   @Column({ unique: true })
   username: string;
   @Column({ unique: true })

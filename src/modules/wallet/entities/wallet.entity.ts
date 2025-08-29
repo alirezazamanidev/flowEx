@@ -1,15 +1,16 @@
+import { BaseEntity } from 'src/common/abstracts/baseEntity.abstract';
 import { UserEntity } from 'src/modules/user/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
+  Entity,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+@Entity('wallet')
+export class WalletEntity extends BaseEntity {
 
-export class WalletEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
   @Column()
   userId: string;
   @Column({ default: 'USD' })

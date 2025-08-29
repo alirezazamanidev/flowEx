@@ -14,6 +14,7 @@ export class TypeOrmDbConfig implements TypeOrmOptionsFactory {
       database: process.env.POSTGRES_DATABASE,
       entities: [join(__dirname, '../modules/**/*.entity.{ts,js}')],
       synchronize: true,
+      logging:['error','warn']
     };
   }
 }

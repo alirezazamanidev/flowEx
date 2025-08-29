@@ -2,11 +2,11 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 't
 import { TransactionType } from '../enums/type.enum';
 import { TransactionStatus } from '../enums/status.enum';
 import { UserEntity } from 'src/modules/user/entities/user.entity';
+import { BaseEntity } from 'src/common/abstracts/baseEntity.abstract';
 
 @Entity('transaction')
-export class TransactionEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+export class TransactionEntity extends BaseEntity {
+ 
   @Column({ nullable: true })
 
   authority: string;
