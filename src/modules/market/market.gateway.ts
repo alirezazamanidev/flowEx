@@ -25,13 +25,9 @@ export class MarketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleDisconnect(client: any) {
     this.logger.log('client client disConnected');
   }
-
-  broadcastMarketOverview(data: any) {
-    this.server.emit('marketUpdate', data);
-  }
   @SubscribeMessage('getOneCandle')
-  getOneCandle(@ConnectedSocket() client:Socket){
-    return this.marketService.getOneCandle('BTCUSDT','5',client)
+  getOneCandle(@ConnectedSocket() client:Socket,@MessageBody() dto:{symbol:string,resolution:string}){
+    return this.marketService.getOneCandle(dto.symbol,dto.resolution,client);
 
   }
 

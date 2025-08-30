@@ -10,6 +10,7 @@ import { WalletModule } from './modules/wallet/wallet.module';
 import { TransactionModule } from './modules/transaction/transaction.module';
 import { HttpCustomModule } from './modules/http/http.module';
 import { MarketModule } from './modules/market/market.module';
+import { OrderModule } from './modules/order/order.module';
 
 @Module({
   imports: [
@@ -23,7 +24,8 @@ import { MarketModule } from './modules/market/market.module';
     WalletModule,
     TransactionModule,
     HttpCustomModule,
-    MarketModule
+    MarketModule,
+    OrderModule
   ],
 })
 export class AppModule {}

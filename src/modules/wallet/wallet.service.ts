@@ -1,4 +1,11 @@
-import { forwardRef, Inject, Injectable, Scope } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+  Scope,
+} from '@nestjs/common';
 import { DataSource, EntityManager } from 'typeorm';
 import { WalletEntity } from './entities/wallet.entity';
 import { DepositDto } from './dto/deposit.dto';
@@ -7,6 +14,10 @@ import { TransactionType } from '../transaction/enums/type.enum';
 import { TransactionStatus } from '../transaction/enums/status.enum';
 import { REQUEST } from '@nestjs/core';
 import type { Request } from 'express';
+import {
+  BadRequestMessage,
+  NotFoundMessage,
+} from 'src/common/enums/messages.enum';
 
 @Injectable({ scope: Scope.REQUEST })
 export class WalletService {
@@ -53,23 +64,24 @@ export class WalletService {
     });
   }
 
-async chargeWallet(amount: number, userId: string): Promise<WalletEntity> {
-  return await this.dataSource.transaction(async (manager) => {
-    // دریافت یا ایجاد کیف پول USD
-    const wallet = await this.getOrCreateWallet(userId, 'USD', manager);
+  async chargeWallet(amount: number, userId: string): Promise<WalletEntity> {
+    return await this.dataSource.transaction(async (manager) => {
+      // دریافت یا ایجاد کیف پول USD
+      const wallet = await this.getOrCreateWallet(userId, 'USD', manager);
 
-    // تبدیل balance از string به number
-    const currentBalance = parseFloat(wallet.balance as any); // TypeORM numeric → string
+      // تبدیل balance از string به number
+      const currentBalance = parseFloat(wallet.balance as any); // TypeORM numeric → string
 
-    // تبدیل ریال به USD
-    const usdAmount = parseFloat((amount / 100_000).toFixed(8));
+      // تبدیل ریال به USD
+      const usdAmount = parseFloat((amount / 100_000).toFixed(8));
 
-    // جمع و rounding
-    wallet.balance = parseFloat((currentBalance + usdAmount).toFixed(8));
+      // جمع و rounding
+      wallet.balance = parseFloat((currentBalance + usdAmount).toFixed(8));
 
-    // ذخیره والت
-    return await manager.save(wallet);
-  });
-}
+      // ذخیره والت
+      return await manager.save(wallet);
+    });
+  }
 
+  
 }

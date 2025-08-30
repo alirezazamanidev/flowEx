@@ -10,7 +10,11 @@ export enum AuthMessages {
     Login='ورود با موفقیت انجام شد!'
 }
 export enum NotFoundMessage{
-    user='اکانت شما یافت نشد!'
+    user='اکانت شما یافت نشد!',
+    Wallet='کیف پول شما یافت نشد!'
+}
+export enum BadRequestMessage {
+  INSUFFICIENT_WALLET_BALANCE = "موجودی کیف پول کافی نیست"
 }
 export enum PublicMessages{
     PostCreated='پست با موفقیت ایجاد شد!'
