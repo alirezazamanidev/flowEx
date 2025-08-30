@@ -1,62 +1,55 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
+  Scope,
 } from '@nestjs/common';
 import {
   BadRequestMessage,
   NotFoundMessage,
 } from 'src/common/enums/messages.enum';
 import { WalletEntity } from '../wallet/entities/wallet.entity';
-import { DataSource } from 'typeorm';
+import { DataSource, EntityManager } from 'typeorm';
 import { OrderEntity } from './entities/order.entity';
 import { OrderSide, OrderStatus } from './enums/order.enum';
+import { REQUEST } from '@nestjs/core';
+import type { Request } from 'express';
+import { ReserveOrderDto } from './dtos/order.dto';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class OrderService {
-  constructor(private dataSource: DataSource) {}
+  constructor(
+    private dataSource: DataSource,
+    @Inject(REQUEST) private request: Request,
+  ) {}
 
-  async reserveFunds(
-    userId: string,
-    currency: string,
-    amount: number,
-    side: OrderSide,
-    volume: number,
-  ) {
+  async reserveFunds(dto: ReserveOrderDto) {
+    const { targetPrice, percentOfWallet, side, currency } = dto;
     return await this.dataSource.transaction(async (manager) => {
-      const wallet = await manager
-        .createQueryBuilder(WalletEntity, 'w')
-        .setLock('pessimistic_write')
-        .where('w.userId = :userId AND w.currency = :currency', {
-          userId,
-          currency,
-        })
-        .getOne();
-      if (!wallet) throw new NotFoundException(NotFoundMessage.Wallet);
-      // check balance
-      const totalPrice = amount * volume;
-      if (Number(wallet.balance) < totalPrice)
-        throw new BadRequestException(
-          BadRequestMessage.INSUFFICIENT_WALLET_BALANCE,
-        );
-      wallet.balance = Number(wallet.balance) - totalPrice;
-      wallet.reserved = Number(wallet.balance) + totalPrice;
-      await manager.save(wallet);
-      // create order
-        const order = manager.create(OrderEntity, {
-      userId,
-      currency,
-      side,
-      amount,
-      volume,
-      status: 'OPEN',
-    });
-    await manager.save(order);
-      return wallet;
+      switch (side) {
+        case OrderSide.BUY:
+          await this.reserveForBuy(manager, {
+            targetPrice,
+            percentOfWallet,
+            currency,
+          });
+          return 'order buy';
+        case OrderSide.SELL:
+          await this.reserveForSell(manager, {
+            targetPrice,
+            percentOfWallet,
+            currency,
+          });
+          return 'order sell';
+
+        default:
+          break;
+      }
     });
   }
 
-  async completeBuy(
+  private async completeBuy(
     userId: string,
     buyCurrency: string,
     amountBought: number,
@@ -94,7 +87,7 @@ export class OrderService {
       await manager.save(buyWallet);
     });
   }
-  async completeSell(
+  private async completeSell(
     userId: string,
     sellCurrency: string, // ارزی که فروخته می‌شود
 
@@ -136,6 +129,72 @@ export class OrderService {
 
       baseWallet.balance = Number(baseWallet.balance) + totalPrice;
       await manager.save(baseWallet);
+    });
+  }
+  private async reserveForBuy(
+    manager: EntityManager,
+    {
+      targetPrice,
+      percentOfWallet,
+      currency
+
+    }: { targetPrice: number; percentOfWallet: number; currency: string },
+  ) {
+    const wallet = await manager
+      .createQueryBuilder(WalletEntity, 'w')
+      .setLock('pessimistic_write')
+      .where('w.userId = :userId AND w.currency = :currency', {
+        userId: this.request.user.id,
+        currency:'USD',
+      })
+      .getOne();
+
+    if (!wallet) throw new NotFoundException(NotFoundMessage.Wallet);
+    const amountToReserve = (percentOfWallet / 100) * wallet.balance;
+    const volume = amountToReserve / targetPrice;
+
+    wallet.balance = wallet.balance - amountToReserve;
+    wallet.reserved = Number(wallet.reserved) + amountToReserve;
+    await manager.save(wallet);
+    await manager.insert(OrderEntity, {
+      userId: this.request.user.id,
+      currency,
+      volume,
+      price: targetPrice,
+      status: OrderStatus.OPEN,
+      side: OrderSide.SELL,
+    });
+  }
+  private async reserveForSell(
+    manager: EntityManager,
+    {
+      targetPrice,
+      percentOfWallet,
+      currency,
+    }: { targetPrice: number; percentOfWallet: number; currency: string },
+  ) {
+    const wallet = await manager
+      .createQueryBuilder(WalletEntity, 'w')
+      .setLock('pessimistic_write')
+      .where('w.userId = :userId AND w.currency = :currency', {
+        userId: this.request.user.id,
+        currency,
+      })
+      .getOne();
+
+    if (!wallet) throw new NotFoundException(NotFoundMessage.Wallet);
+    const amountToReserve = (percentOfWallet / 100) * wallet.balance;
+    const volume = amountToReserve / targetPrice;
+    wallet.balance = wallet.balance - amountToReserve;
+    wallet.reserved = Number(wallet.reserved) + amountToReserve;
+    await manager.save(wallet);
+    await manager.insert(OrderEntity, {
+      userId: this.request.user.id,
+      currency,
+      status: OrderStatus.OPEN,
+      volume,
+      price: targetPrice,
+      side: OrderSide.SELL,
     });
   }
 }

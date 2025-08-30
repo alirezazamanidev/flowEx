@@ -9,9 +9,11 @@ export class OrderEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 20 })
   currency: string;
   @Column({ type: 'enum', enum: OrderSide })
-  side: OrderSide;
-  @Column({type:'enum',enum:OrderStatus})
-  status:string
+  side: string;
+  @Column({ type: 'enum', enum: OrderStatus })
+  status: string;
+  @Column({ type: 'numeric', precision: 10, scale: 2, nullable: true })
+  profitLossPercent: number;
   @Column({
     type: 'numeric',
     precision: 30,
@@ -26,9 +28,9 @@ export class OrderEntity extends BaseEntity {
     nullable: true,
   })
   volume: number;
-  
+
   @CreateDateColumn()
-  created_at:Date
+  created_at: Date;
   @UpdateDateColumn()
-  updated_at:Date
+  updated_at: Date;
 }
