@@ -1,10 +1,16 @@
 import { Module } from '@nestjs/common';
-import { OrderService } from './order.service';
+import { OrderService } from './services/order.service';
+
+
+import { OrderStreamService } from './services/order-streem.service';
+import { JwtModule } from '@nestjs/jwt';
 import { OrderGateway } from './order.gateway';
-import { OrderController } from './order.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { OrderEntity } from './entities/order.entity';
 
 @Module({
-  controllers:[OrderController],
-  providers: [OrderGateway, OrderService],
+  imports: [TypeOrmModule.forFeature([OrderEntity]), JwtModule.register({ global: true })],
+  // controllers:[OrderController],
+  providers:  [OrderGateway,OrderService, OrderStreamService],
 })
 export class OrderModule {}

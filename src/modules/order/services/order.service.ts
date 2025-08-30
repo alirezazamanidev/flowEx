@@ -9,13 +9,13 @@ import {
   BadRequestMessage,
   NotFoundMessage,
 } from 'src/common/enums/messages.enum';
-import { WalletEntity } from '../wallet/entities/wallet.entity';
+import { WalletEntity } from '../../wallet/entities/wallet.entity';
 import { DataSource, EntityManager } from 'typeorm';
-import { OrderEntity } from './entities/order.entity';
-import { OrderSide, OrderStatus } from './enums/order.enum';
+import { OrderEntity } from '../entities/order.entity';
+import { OrderSide, OrderStatus } from '../enums/order.enum';
 import { REQUEST } from '@nestjs/core';
 import type { Request } from 'express';
-import { ReserveOrderDto } from './dtos/order.dto';
+import { ReserveOrderDto } from '../dtos/order.dto';
 
 @Injectable({ scope: Scope.REQUEST })
 export class OrderService {
@@ -136,8 +136,7 @@ export class OrderService {
     {
       targetPrice,
       percentOfWallet,
-      currency
-
+      currency,
     }: { targetPrice: number; percentOfWallet: number; currency: string },
   ) {
     const wallet = await manager
@@ -145,7 +144,7 @@ export class OrderService {
       .setLock('pessimistic_write')
       .where('w.userId = :userId AND w.currency = :currency', {
         userId: this.request.user.id,
-        currency:'USD',
+        currency: 'USD',
       })
       .getOne();
 
