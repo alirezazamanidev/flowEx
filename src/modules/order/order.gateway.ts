@@ -6,7 +6,6 @@ import {
   WebSocketGateway,
 } from '@nestjs/websockets';
 import { OrderService } from './services/order.service';
-import { OrderStreamService } from './services/order-streem.service';
 import { JwtService } from '@nestjs/jwt';
 import { Logger } from '@nestjs/common';
 import { Socket } from 'socket.io';
@@ -16,7 +15,7 @@ import { isJWT } from 'class-validator';
 export class OrderGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(OrderGateway.name);
   constructor(
-    private orderStreamService: OrderStreamService,
+   
     private jwtService: JwtService,
   ) {}
 
@@ -31,10 +30,6 @@ export class OrderGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.logger.log(`Client disconnected: ${client.id}`);
   }
 
-  @SubscribeMessage('update-order')
-  updateOrder(@ConnectedSocket() client: Socket) {
-    return this.orderStreamService.updateOrders(client.data.user.userId,client);
-  }
 
   async authenticate(client: Socket) {
     try {

@@ -14,7 +14,7 @@ export class WalletEntity extends BaseEntity {
   userId: string;
   @Column({ default: 'USD' })
   currency: string;
-  @Column({ type: 'numeric', precision: 30, scale: 18, default: 0 })
+  @Column({ type: 'numeric', precision: 30, scale: 10, default: 0 })
   balance: number;
 
   @ManyToOne(() => UserEntity, (user) => user.wallets, { onDelete: 'CASCADE' })

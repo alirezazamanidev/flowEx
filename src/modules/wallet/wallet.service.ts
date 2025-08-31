@@ -21,18 +21,14 @@ import {
 import Redis from 'ioredis';
 import { Server } from 'socket.io';
 
-@Injectable({ scope: Scope.REQUEST })
+@Injectable({})
 export class WalletService {
-  private RedisSub: Redis;
-
   constructor(
     @Inject(REQUEST) private readonly request: Request,
     private readonly dataSource: DataSource,
     @Inject(forwardRef(() => TransactionService))
     private transactionService: TransactionService,
-  ) {
-    this.RedisSub = new Redis(process.env.REDIS_URL);
-  }
+  ) {}
 
   async getOrCreateWallet(
     userId: string,
