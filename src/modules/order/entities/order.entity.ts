@@ -6,8 +6,6 @@ import { OrderSide, OrderStatus, OrderType } from '../enums/order.enum';
 export class OrderEntity extends BaseEntity {
   @Column()
   userId: string;
-  @Column({ type: 'enum', enum: OrderType })
-  type: string;
   @Column({ type: 'varchar', length: 20 })
   currency: string;
   @Column({ type: 'enum', enum: OrderSide })

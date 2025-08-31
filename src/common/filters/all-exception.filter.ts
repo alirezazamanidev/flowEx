@@ -18,7 +18,7 @@ export class AllExceptionFilter implements ExceptionFilter {
 
     
     const errorResponse: any = {
-      statusCode:exception.getStatus() || HttpStatus.INTERNAL_SERVER_ERROR,
+      statusCode:exception.status || HttpStatus.INTERNAL_SERVER_ERROR,
       timestamp: new Date().toISOString(),
       path: request.url,
       message: exception.message || 'Internal server error',
