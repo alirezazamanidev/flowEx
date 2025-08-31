@@ -2,6 +2,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { WalletController } from './wallet.controller';
 import { TransactionModule } from '../transaction/transaction.module';
+import { WalletGateway } from './wallet.gateway';
 
 @Module({
     imports: [forwardRef(() => TransactionModule)],

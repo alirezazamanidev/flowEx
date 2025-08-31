@@ -8,5 +8,7 @@ export const CryptoSymbolsUSD = [
   'DOGEUSDT', // دوج‌کوین
   'DOTUSDT',  // پولکادات
   'LTCUSDT',  // لایت‌کوین
-  'MATICUSDT' // پالیگان
+  'MATICUSDT', // پالیگان
+  
+   
 ];

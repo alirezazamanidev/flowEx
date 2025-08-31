@@ -18,15 +18,21 @@ import {
   BadRequestMessage,
   NotFoundMessage,
 } from 'src/common/enums/messages.enum';
+import Redis from 'ioredis';
+import { Server } from 'socket.io';
 
 @Injectable({ scope: Scope.REQUEST })
 export class WalletService {
+  private RedisSub: Redis;
+
   constructor(
     @Inject(REQUEST) private readonly request: Request,
     private readonly dataSource: DataSource,
     @Inject(forwardRef(() => TransactionService))
     private transactionService: TransactionService,
-  ) {}
+  ) {
+    this.RedisSub = new Redis(process.env.REDIS_URL);
+  }
 
   async getOrCreateWallet(
     userId: string,
@@ -64,24 +70,12 @@ export class WalletService {
     });
   }
 
-  async chargeWallet(amount: number, userId: string): Promise<WalletEntity> {
+  async chargeWallet(amount: number, userId: string) {
     return await this.dataSource.transaction(async (manager) => {
-      // دریافت یا ایجاد کیف پول USD
       const wallet = await this.getOrCreateWallet(userId, 'USD', manager);
 
-      // تبدیل balance از string به number
-      const currentBalance = parseFloat(wallet.balance as any); // TypeORM numeric → string
-
-      // تبدیل ریال به USD
-      const usdAmount = parseFloat((amount / 100_000).toFixed(8));
-
-      // جمع و rounding
-      wallet.balance = parseFloat((currentBalance + usdAmount).toFixed(8));
-
-      // ذخیره والت
-      return await manager.save(wallet);
+      wallet.balance = amount / 100_000;
+      await manager.save(wallet);
     });
   }
-
-  
 }

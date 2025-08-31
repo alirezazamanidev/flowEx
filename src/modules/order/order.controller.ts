@@ -14,6 +14,6 @@ export class OrderController {
   @Post('reserve-order')
   @ApiConsumes(ContentTypeEnum.Form, ContentTypeEnum.Json)
   reserveOrder(@Body() dto: ReserveOrderDto) {
-    return this.orderService.reserveFunds(dto);
+    return this.orderService.reserveOrder(dto);
   }
 }

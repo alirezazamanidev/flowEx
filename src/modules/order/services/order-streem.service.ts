@@ -60,4 +60,33 @@ export class OrderStreamService {
 
     console.log('Subscribed and streaming live orders...');
   }
+
+  async watchOpenOrders(client: Socket) {
+    const userId = client.data.user.userId;
+    const orders = await this.orderRepository.find({
+      where: { status: OrderStatus.OPEN, userId },
+    });
+
+    const ordersByCurrency: Record<string, typeof orders> = {};
+    for (const order of orders) {
+      if (!ordersByCurrency[order.currency]) {
+        ordersByCurrency[order.currency] = [];
+        this.redisSub.subscribe(`candle:${order.currency}:5`);
+      }
+      ordersByCurrency[order.currency].push(order);
+    }
+
+    this.redisSub.on('message', async (channel, message) => {
+      const { close: currentPrice, symbol } = JSON.parse(message);
+
+      const relatedOrders = ordersByCurrency[symbol];
+      if (!relatedOrders) return;
+
+      for (const order of relatedOrders) {
+        
+      }
+    });
+  }
+
+
 }

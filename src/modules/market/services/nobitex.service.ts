@@ -40,7 +40,7 @@ export class NobitexRealtimeService implements OnModuleInit {
   }
 
   async subscribeAllCandles() {
-    const resolutions = ['3', '5', '60'];
+    const resolutions = ['1','3', '5', '60'];
     const channels = this.USDSymbols.flatMap((symbol) =>
       resolutions.map((resolution) => ({
         channel: `public:candle-${symbol}-${resolution}`,
@@ -48,7 +48,7 @@ export class NobitexRealtimeService implements OnModuleInit {
         resolution,
       })),
     );
-    for (const chanel of channels) {
+      for (const chanel of channels) {
       const sub = this.client.newSubscription(chanel.channel);
       sub.on('publication', async ({ data }) => {
         const candle = {
@@ -60,6 +60,7 @@ export class NobitexRealtimeService implements OnModuleInit {
           close: data.c ?? 0,
           volume: data.v ?? 0,
         };
+
         await this.redisPub.set(
           `candle:${candle.symbol}:${chanel.resolution}`,
           JSON.stringify(candle),

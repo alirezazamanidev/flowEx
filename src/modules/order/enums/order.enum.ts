@@ -7,3 +7,7 @@ export enum OrderStatus {
   COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED',
 }
+export enum OrderType {
+  MARKET = 'MARKET',
+  LIMIT = 'LIMIT',  
+}

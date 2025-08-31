@@ -12,188 +12,106 @@ import {
 import { WalletEntity } from '../../wallet/entities/wallet.entity';
 import { DataSource, EntityManager } from 'typeorm';
 import { OrderEntity } from '../entities/order.entity';
-import { OrderSide, OrderStatus } from '../enums/order.enum';
+import { OrderSide, OrderStatus, OrderType } from '../enums/order.enum';
 import { REQUEST } from '@nestjs/core';
 import type { Request } from 'express';
 import { ReserveOrderDto } from '../dtos/order.dto';
+import { REDIS_CLIENT } from 'src/configs/redis.config';
+import Redis from 'ioredis';
 
 @Injectable({ scope: Scope.REQUEST })
 export class OrderService {
   constructor(
+    @Inject(REDIS_CLIENT) private redisCleint: Redis,
     private dataSource: DataSource,
     @Inject(REQUEST) private request: Request,
   ) {}
 
-  async reserveFunds(dto: ReserveOrderDto) {
-    const { targetPrice, percentOfWallet, side, currency } = dto;
+  async reserveOrder(dto: ReserveOrderDto) {
+    const {
+      type,
+      side,
+      currency,
+      targetPrice,
+      stopLoss,
+      percentOfWallet,
+      takeProfit,
+    } = dto;
     return await this.dataSource.transaction(async (manager) => {
-      switch (side) {
-        case OrderSide.BUY:
-          await this.reserveForBuy(manager, {
-            targetPrice,
-            percentOfWallet,
-            currency,
-          });
-          return 'order buy';
-        case OrderSide.SELL:
-          await this.reserveForSell(manager, {
-            targetPrice,
-            percentOfWallet,
-            currency,
-          });
-          return 'order sell';
-
-        default:
-          break;
+      if (type === OrderType.MARKET) {
+        return await this.orderMarket(manager, {
+          percentOfWallet,
+          currency,
+          side,
+          takeProfit,
+          stopLoss,
+        });
       }
     });
   }
-
-  private async completeBuy(
-    userId: string,
-    buyCurrency: string,
-    amountBought: number,
-    totalPrice: number,
+  async orderMarket(
+    manager: EntityManager,
+    {
+      percentOfWallet,
+      currency,
+      side,
+      takeProfit,
+      stopLoss,
+    }: {
+      percentOfWallet: number;
+      currency: string;
+      side: string;
+      takeProfit?: number;
+      stopLoss?: number;
+    },
   ) {
-    return await this.dataSource.transaction(async (manager) => {
+    if (side == OrderSide.BUY) {
       const baseWallet = await manager
-        .createQueryBuilder(WalletEntity, 'bw')
+        .createQueryBuilder(WalletEntity, 'w')
         .setLock('pessimistic_write')
-        .where('bw.userId = :userId AND bw.currency= :currency', {
-          userId,
+        .where('w.userId = :userId AND w.currency = :currency', {
+          userId: this.request.user.id,
           currency: 'USD',
         })
         .getOne();
       if (!baseWallet) throw new NotFoundException(NotFoundMessage.Wallet);
-      baseWallet.reserved = Number(baseWallet?.reserved) - totalPrice;
-      await manager.save(baseWallet);
-
-      let buyWallet = await manager
+      let wallet = await manager
         .createQueryBuilder(WalletEntity, 'w')
         .setLock('pessimistic_write')
         .where('w.userId = :userId AND w.currency = :currency', {
-          userId,
-          currency: buyCurrency,
+          userId: this.request.user.id,
+          currency,
         })
         .getOne();
-      if (!buyWallet) {
-        buyWallet = manager.create(WalletEntity, {
-          userId,
-          currency: buyCurrency,
+      if (!wallet) {
+        wallet = manager.create(WalletEntity, {
+          userId: this.request.user.id,
+          currency,
           balance: 0,
         });
       }
-      buyWallet.balance = Number(buyWallet.balance) + amountBought;
-      await manager.save(buyWallet);
-    });
-  }
-  private async completeSell(
-    userId: string,
-    sellCurrency: string, // ارزی که فروخته می‌شود
-
-    amountSold: number,
-    totalPrice: number,
-  ) {
-    return await this.dataSource.transaction(async (manager) => {
-      // کم کردن ارز فروخته شده از رزرو
-      const sellWallet = await manager
-        .createQueryBuilder(WalletEntity, 'w')
-        .setLock('pessimistic_write')
-        .where('w.userId = :userId AND w.currency = :currency', {
-          userId,
-          currency: sellCurrency,
-        })
-        .getOne();
-      if (!sellWallet) throw new NotFoundException(NotFoundMessage.Wallet);
-
-      sellWallet.reserved = Number(sellWallet.reserved) - amountSold;
-      await manager.save(sellWallet);
-
-      // اضافه کردن معادل دلاری به کیف پول USD
-      let baseWallet = await manager
-        .createQueryBuilder(WalletEntity, 'w')
-        .setLock('pessimistic_write')
-        .where('w.userId = :userId AND w.currency = :currency', {
-          userId,
-          currency: 'USD',
-        })
-        .getOne();
-
-      if (!baseWallet) {
-        baseWallet = manager.create(WalletEntity, {
-          userId,
-          currency: 'UDS',
-          balance: 0,
-        });
-      }
-
-      baseWallet.balance = Number(baseWallet.balance) + totalPrice;
+      const cryptoCached = await this.redisCleint.get(`candle:${currency}:5`);
+      if (!cryptoCached) throw new NotFoundException('ارز مورد نظر یافت نشد');
+      const { close: cryptoPrice } = JSON.parse(cryptoCached);
+      const amountReserved = (percentOfWallet / 100) * baseWallet.balance;
+      const volume = amountReserved / cryptoPrice;
+      wallet.balance += volume;
+      baseWallet.balance -= amountReserved;
+      await manager.save(wallet);
       await manager.save(baseWallet);
-    });
-  }
-  private async reserveForBuy(
-    manager: EntityManager,
-    {
-      targetPrice,
-      percentOfWallet,
-      currency,
-    }: { targetPrice: number; percentOfWallet: number; currency: string },
-  ) {
-    const wallet = await manager
-      .createQueryBuilder(WalletEntity, 'w')
-      .setLock('pessimistic_write')
-      .where('w.userId = :userId AND w.currency = :currency', {
-        userId: this.request.user.id,
-        currency: 'USD',
-      })
-      .getOne();
-
-    if (!wallet) throw new NotFoundException(NotFoundMessage.Wallet);
-    const amountToReserve = (percentOfWallet / 100) * wallet.balance;
-    const volume = amountToReserve / targetPrice;
-
-    wallet.balance = wallet.balance - amountToReserve;
-    wallet.reserved = Number(wallet.reserved) + amountToReserve;
-    await manager.save(wallet);
-    await manager.insert(OrderEntity, {
-      userId: this.request.user.id,
-      currency,
-      volume,
-      price: targetPrice,
-      status: OrderStatus.OPEN,
-      side: OrderSide.SELL,
-    });
-  }
-  private async reserveForSell(
-    manager: EntityManager,
-    {
-      targetPrice,
-      percentOfWallet,
-      currency,
-    }: { targetPrice: number; percentOfWallet: number; currency: string },
-  ) {
-    const wallet = await manager
-      .createQueryBuilder(WalletEntity, 'w')
-      .setLock('pessimistic_write')
-      .where('w.userId = :userId AND w.currency = :currency', {
+      await manager.insert(OrderEntity, {
         userId: this.request.user.id,
         currency,
-      })
-      .getOne();
-
-    if (!wallet) throw new NotFoundException(NotFoundMessage.Wallet);
-    const amountToReserve = (percentOfWallet / 100) * wallet.balance;
-    const volume = amountToReserve / targetPrice;
-    wallet.balance = wallet.balance - amountToReserve;
-    wallet.reserved = Number(wallet.reserved) + amountToReserve;
-    await manager.save(wallet);
-    await manager.insert(OrderEntity, {
-      userId: this.request.user.id,
-      currency,
-      status: OrderStatus.OPEN,
-      volume,
-      price: targetPrice,
-      side: OrderSide.SELL,
-    });
+        price: cryptoPrice,
+        side,
+        type: OrderType.MARKET,
+        volume,
+        takeProfit,
+        stopLoss,
+      });
+      return {
+        message: 'خرید انجام شد!',
+      };
+    }
   }
 }
