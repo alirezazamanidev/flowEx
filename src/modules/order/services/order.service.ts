@@ -68,11 +68,7 @@ export class OrderService {
         targetPrice.toString(),
         order.id,
       );
-      await this.orderLimitQueue.add('check-limit-orders', {
-        currency,
-        side,
-      });
-
+     
       return {
         message:'سفارش شما باز شد',
         orderId:order.id,

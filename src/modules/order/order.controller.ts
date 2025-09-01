@@ -10,13 +10,7 @@ import { ContentTypeEnum } from 'src/common/enums/form.enum';
 export class OrderController {
   constructor(private orderService: OrderService) {}
 
-  // @ApiOperation({ summary: 'reserve order' })
-  // @Post('market-order')
-  // @ApiConsumes(ContentTypeEnum.Form, ContentTypeEnum.Json)
-  // reserveOrder(@Body() dto: MarketOrderDto) {
-  //   return this.orderService.placeMarketOrder(dto);
-  // }
-
+  
   @ApiOperation({ summary: 'reserve order' })
   @Post('limit-order')
   @ApiConsumes(ContentTypeEnum.Form, ContentTypeEnum.Json)

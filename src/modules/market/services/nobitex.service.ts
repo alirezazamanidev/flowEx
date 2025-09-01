@@ -12,14 +12,16 @@ export class NobitexRealtimeService implements OnModuleInit {
   private client: Centrifuge;
   private logger = new Logger(NobitexRealtimeService.name);
   private USDSymbols = CryptoSymbolsUSD;
-  constructor(private candleService:CandleService,private gateway:MarketGateway){}
+  constructor(
+    private candleService: CandleService,
+    private gateway: MarketGateway,
+  ) {}
 
   onModuleInit() {
     this.connect();
     this.subscribeAllCandles();
   }
 
-  
   private connect() {
     this.client = new Centrifuge('wss://ws.nobitex.ir/connection/websocket');
 
@@ -39,9 +41,8 @@ export class NobitexRealtimeService implements OnModuleInit {
     this.client.connect();
   }
 
-
   async subscribeAllCandles() {
-    const resolutions = ['1','3', '5', '60'];
+    const resolutions = ['1', '3', '5', '60'];
     const channels = this.USDSymbols.flatMap((symbol) =>
       resolutions.map((resolution) => ({
         channel: `public:candle-${symbol}-${resolution}`,
@@ -49,10 +50,10 @@ export class NobitexRealtimeService implements OnModuleInit {
         resolution,
       })),
     );
-      for (const chanel of channels) {
+    for (const chanel of channels) {
       const sub = this.client.newSubscription(chanel.channel);
       sub.on('publication', async ({ data }) => {
-        const candle:CandleType = {
+        const candle: CandleType = {
           symbol: data.symbol || chanel.symbol,
           time: data.t,
           open: data.o ?? 0,
@@ -62,8 +63,10 @@ export class NobitexRealtimeService implements OnModuleInit {
           volume: data.v ?? 0,
         };
 
-        await this.candleService.save(chanel.symbol,chanel.resolution,candle);
-        this.gateway.server.to(`candle:${candle.symbol}:${chanel.resolution}`).emit('candle-info',candle);
+        await this.candleService.save(chanel.symbol, chanel.resolution, candle);
+        this.gateway.server
+          .to(`candle:${candle.symbol}:${chanel.resolution}`)
+          .emit('candle-info', candle);
       });
       sub.subscribe();
     }

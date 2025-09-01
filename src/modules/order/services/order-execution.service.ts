@@ -21,31 +21,20 @@ export class OrderExecutionService {
     private gateway: OrderGateway,
   ) {}
 
-  async checkLimitOrders(currency: string, side: string) {
-    const cached = await this.redisClient.get(`candle:${currency}:1`);
-    if (!cached) return;
-    const { close: currentPrice } = JSON.parse(cached);
-    const key = `order:limit:${side}:${currency}`;
-    let orderIds: string[] = [];
-    if (side === OrderSide.BUY) {
-      orderIds = await this.redisClient.zrangebyscore(
-        key,
-        '-inf',
-        currentPrice,
-      );
-    } else if (side === OrderSide.SELL) {
-      orderIds = await this.redisClient.zrangebyscore(
+  async checkLimitOrders(currency: string, currentPrice: number) {
+    
+    for (const side of [OrderSide.BUY, OrderSide.SELL]) {
+      const key = `order:limit:${side}:${currency}`
+      const orderIds = await this.redisClient.zrangebyscore(
         key,
         currentPrice,
-        '+inf',
+        currentPrice,
       );
-    }
 
-    for (const orderId of orderIds) {
-      await this.orderLimitQueue.add('execute-limit-order', {
-        orderId,
-        currentPrice,
-      });
+      for (const orderId of orderIds) {
+        await this.orderLimitQueue.add('execute-limit-order', { orderId, currentPrice });
+        await this.redisClient.zrem(key, orderId);
+      }
     }
   }
   async executeLimitOrder(orderId: string, currentPrice: number) {
