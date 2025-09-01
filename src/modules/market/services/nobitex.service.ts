@@ -12,7 +12,7 @@ export class NobitexRealtimeService implements OnModuleInit {
   private client: Centrifuge;
   private logger = new Logger(NobitexRealtimeService.name);
   private USDSymbols = CryptoSymbolsUSD;
-  constructor(private candleService:CandleService){}
+  constructor(private candleService:CandleService,private gateway:MarketGateway){}
 
   onModuleInit() {
     this.connect();
@@ -63,6 +63,7 @@ export class NobitexRealtimeService implements OnModuleInit {
         };
 
         await this.candleService.save(chanel.symbol,chanel.resolution,candle);
+        this.gateway.server.to(`candle:${candle.symbol}:${chanel.resolution}`).emit('candle-info',candle);
       });
       sub.subscribe();
     }

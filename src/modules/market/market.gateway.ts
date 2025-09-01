@@ -7,7 +7,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Server,Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { NobitexRealtimeService } from './services/nobitex.service';
 import { Logger } from '@nestjs/common';
 import { MarketService } from './services/market.service';
@@ -16,8 +16,7 @@ export class MarketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(MarketGateway.name);
   @WebSocketServer()
   server: Server;
-  constructor(private marketService:MarketService){}
-  
+  constructor(private marketService: MarketService) {}
 
   handleConnection(client: any) {
     this.logger.log('client client connected');
@@ -25,11 +24,13 @@ export class MarketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleDisconnect(client: any) {
     this.logger.log('client client disConnected');
   }
-  @SubscribeMessage('getOneCandle')
-  getOneCandle(@ConnectedSocket() client:Socket,@MessageBody() dto:{symbol:string,resolution:string}){
-    return this.marketService.getOneCandle(dto.symbol,dto.resolution,client);
-
+  @SubscribeMessage('subscribe-candle')
+  getOneCandle(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() dto: { symbol: string; resolution: string },
+  ) {
+    const room=`candle:${dto.symbol}:${dto.resolution}`;
+    client.join(room);
+    this.logger.log(`client subcribed ${dto.symbol} chanel`)
   }
-
-
 }

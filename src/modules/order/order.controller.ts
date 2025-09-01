@@ -11,14 +11,14 @@ export class OrderController {
   constructor(private orderService: OrderService) {}
 
   @ApiOperation({ summary: 'reserve order' })
- @Post('market-order')
+  @Post('market-order')
   @ApiConsumes(ContentTypeEnum.Form, ContentTypeEnum.Json)
   reserveOrder(@Body() dto: MarketOrderDto) {
     return this.orderService.placeMarketOrder(dto);
   }
 
-    @ApiOperation({ summary: 'reserve order' })
- @Post('limit-order')
+  @ApiOperation({ summary: 'reserve order' })
+  @Post('limit-order')
   @ApiConsumes(ContentTypeEnum.Form, ContentTypeEnum.Json)
   limitOrder(@Body() dto: LimitOrderDto) {
     return this.orderService.placeLimitOrder(dto);

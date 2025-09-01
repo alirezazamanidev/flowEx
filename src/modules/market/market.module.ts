@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { MarketService } from './services/market.service';
-import { MarketController } from './market.controller';
 import {NobitexRealtimeService } from './services/nobitex.service';
 import { MarketGateway } from './market.gateway';
 import { CandleService } from './services/candle.service';
