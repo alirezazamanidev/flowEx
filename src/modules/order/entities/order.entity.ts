@@ -1,40 +1,44 @@
-import { BaseEntity } from 'src/common/abstracts/baseEntity.abstract';
-import { Column, CreateDateColumn, Entity, UpdateDateColumn } from 'typeorm';
-import { OrderSide, OrderStatus, OrderType } from '../enums/order.enum';
+import { BaseEntity } from "src/common/abstracts/baseEntity.abstract";
+import { Column, CreateDateColumn, Entity, UpdateDateColumn } from "typeorm";
+import { OrderSide, OrderStatus, OrderType } from "../enums/order.enum";
 
 @Entity('order')
 export class OrderEntity extends BaseEntity {
   @Column()
   userId: string;
+
   @Column({ type: 'varchar', length: 20 })
   currency: string;
+
   @Column({ type: 'enum', enum: OrderSide })
   side: string;
-  @Column({ type: 'enum', enum: OrderStatus })
-  status: string;
-  @Column({ type: 'numeric', precision: 10, scale: 2, nullable: true })
-  plsn: number; // درصد سود و ضرر
-  @Column({
-    type: 'numeric',
-    precision: 30,
-    scale: 10,
-    nullable: true,
-  })
-  @Column({ type: 'numeric', precision: 30, scale: 10, nullable: true })
-  takeProfit: number;
-  @Column({ type: 'numeric', precision: 30, scale: 10, nullable: true })
-  stopLoss: number;
-  price: number;
-  @Column({
-    type: 'numeric',
-    precision: 30,
-    scale: 10,
-    nullable: true,
-  })
+
+  @Column({ type: 'enum', enum: OrderType, default: OrderType.MARKET })
+  type: string // MARKET | LIMIT | STOP
+
+  @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.OPEN })
+  status: string
+  
+  @Column({ type: 'numeric', precision: 30, scale: 10 })
   volume: number;
+  @Column({ type: 'numeric', precision: 30, scale: 10, nullable: true })
+  targetPrice: number | null;
+  @Column({ type: 'numeric', precision: 30, scale: 10, nullable: true })
+  takeProfit: number | null;
+  @Column({ type: 'numeric', precision: 30, scale: 10, nullable: true })
+  stopLoss: number | null;
+
+  // درصد سود و ضرر محقق شده (بعد از بسته شدن سفارش محاسبه میشه)
+  @Column({ type: 'numeric', precision: 10, scale: 2, nullable: true })
+  pnlPercent: number | null;
+
+  // قیمت خروج واقعی (وقتی سفارش بسته شد)
+  @Column({ type: 'numeric', precision: 30, scale: 10, nullable: true })
+  exitPrice: number | null;
 
   @CreateDateColumn()
   created_at: Date;
+
   @UpdateDateColumn()
   updated_at: Date;
 }

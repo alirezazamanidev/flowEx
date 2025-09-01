@@ -15,19 +15,22 @@ import { OrderEntity } from '../entities/order.entity';
 import { OrderSide, OrderStatus, OrderType } from '../enums/order.enum';
 import { REQUEST } from '@nestjs/core';
 import type { Request } from 'express';
-import { MarketOrderDto } from '../dtos/order.dto';
+import { LimitOrderDto, MarketOrderDto } from '../dtos/order.dto';
 import { REDIS_CLIENT } from 'src/configs/redis.config';
 import Redis from 'ioredis';
 import Big from 'big.js';
+import { Queue } from 'bullmq';
+import { InjectQueue } from '@nestjs/bullmq';
 @Injectable({ scope: Scope.REQUEST })
 export class OrderService {
   constructor(
     @Inject(REDIS_CLIENT) private redisClient: Redis,
     private dataSource: DataSource,
+    @InjectQueue('order') private OrderLimitQueue: Queue,
     @Inject(REQUEST) private request: Request,
   ) {}
   async placeMarketOrder(dto: MarketOrderDto) {
-    const { percentOfWallet, takeProfit, stopLoss, side, currency } = dto;
+    const { percentOfWallet, side, currency } = dto;
 
     return await this.dataSource.transaction(async (manager) => {
       const baseWallet = await this.lockWallet(manager, 'USD');
@@ -51,10 +54,10 @@ export class OrderService {
 
         baseWallet.balance = Big(baseWallet.balance)
           .minus(amountToUseBig)
-          .toString();
+          .toNumber();
         cryptoWallet.balance = Big(cryptoWallet.balance)
           .plus(volumeBig)
-          .toString();
+          .toNumber();
       } else if (side === OrderSide.SELL) {
         if (cryptoWallet.balance <= 0)
           throw new BadRequestException(
@@ -66,10 +69,10 @@ export class OrderService {
 
         cryptoWallet.balance = Big(cryptoWallet.balance)
           .minus(volumeBig)
-          .toString();
+          .toNumber();
         baseWallet.balance = Big(baseWallet.balance)
           .plus(amountToUseBig)
-          .toString();
+          .toNumber();
       }
 
       await manager.save(baseWallet);
@@ -80,12 +83,9 @@ export class OrderService {
         userId: this.request.user.id,
         currency,
         side,
-        status: OrderStatus.COMPLETED,
-        price: priceBig.toString(),
-        volume: volumeBig.toString(),
-        takeProfit,
-
-        stopLoss,
+        status: OrderStatus.CLOSE,
+        
+        volume: volumeBig.toNumber(),
       });
 
       return {
@@ -93,6 +93,54 @@ export class OrderService {
       };
     });
   }
+
+  async placeLimitOrder(dto: LimitOrderDto) {
+    const { side, percentOfWallet, currency, targetPrice } = dto;
+    return await this.dataSource.transaction(async (manager) => {
+      const baseWallet = await this.lockWallet(manager, 'USD');
+      // const cryptoWallet = await this.lockWallet(manager, currency);
+      let volume: Big = Big(0);
+      let amountToUse: Big = Big(0);
+
+      if (side === OrderSide.BUY) {
+        // محاسبه مقدار دلاری که باید مصرف شود
+        amountToUse = Big(baseWallet.balance).times(percentOfWallet).div(100);
+        if (amountToUse.lte(0))
+          throw new BadRequestException('موجودی کافی نیست');
+        volume = amountToUse.div(targetPrice);
+        baseWallet.balance = Big(baseWallet.balance).minus(amountToUse).toNumber();
+        await manager.save(baseWallet);
+      } else if (side === OrderSide.SELL) {
+        // فقط بررسی موجودی کریپتو اگر فروش است
+        const cryptoWallet = await this.lockWallet(manager, currency);
+        volume = Big(cryptoWallet.balance).times(percentOfWallet).div(100);
+        if (volume.lte(0)) throw new BadRequestException('موجودی کافی نیست');
+        cryptoWallet.balance=Big(cryptoWallet.balance).minus(volume).toNumber();
+        await manager.save(cryptoWallet);
+      }
+
+      let order = manager.create(OrderEntity, {
+        userId: this.request.user.id,
+        side,
+        type: OrderType.LIMIT,
+        status: OrderStatus.OPEN,
+        currency,
+        volume: volume.toNumber(),
+       targetPrice
+      });
+      order = await manager.save(order);
+      await this.redisClient.zadd(
+        `order:limit:${side}:${currency}`,
+        targetPrice.toString(),
+        order.id,
+      );
+
+      await this.OrderLimitQueue.add('check.limit-order', {
+        currency,
+      });
+    });
+  }
+
   private async getOrCreateWallet(
     manager: EntityManager,
 

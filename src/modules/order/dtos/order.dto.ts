@@ -19,16 +19,27 @@ export class MarketOrderDto {
   @Max(100)
   percentOfWallet: number;
 
-  @ApiPropertyOptional({description:'حد ضرر'})
-  @IsOptional()
-  @IsNumber()
-  @IsPositive()
-  stopLoss?: number;
 
-  @ApiPropertyOptional({description:"حد سود"})
- @IsOptional()
+}
+export class LimitOrderDto {
+  @ApiProperty({ description: 'نماد ارز، مثلاً BTC' })
+  @IsNotEmpty()
+  @IsString()
+  currency: string;
+  @ApiProperty({ description: 'ساید سفارش: خرید یا فروش', enum: OrderSide })
+  @IsNotEmpty()
+  @IsEnum(OrderSide)
+  side: OrderSide;
+  @ApiProperty({description:"قیمت هدف"})
+  @IsNotEmpty()
   @IsNumber()
-  @IsPositive()
-  takeProfit?: number;
+  targetPrice: number;
+  @ApiProperty({ description: 'درصد از موجودی کیف پول برای رزرو', minimum: 1, maximum: 100 })
+  @IsNotEmpty()
+  @IsNumber()
+  @Min(1)
+  @Max(100)
+  percentOfWallet: number;
+
 
 }

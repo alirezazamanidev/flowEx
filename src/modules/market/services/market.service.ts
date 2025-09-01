@@ -4,15 +4,13 @@ import { MarketGateway } from '../market.gateway';
 import { Socket } from 'socket.io';
 
 @Injectable()
-export class MarketService implements OnModuleInit {
+export class MarketService {
   private readonly redisSub: Redis;
   constructor() {
     this.redisSub = new Redis(process.env.REDIS_URL);
   }
 
-  onModuleInit() {
 
-  }
  
   getOneCandle(symbol: string, resolution: string,client:Socket) {
   

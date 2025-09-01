@@ -1,5 +1,5 @@
 
-export type CryptoCandleInfoType ={
+export type CandleType ={
     symbol:string
     time:number
     open:number

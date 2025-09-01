@@ -4,10 +4,11 @@ export enum OrderSide {
 }
 export enum OrderStatus {
   OPEN = 'OPEN',
-  COMPLETED = 'COMPLETED',
+  CLOSE = 'CLOSE',
   CANCELLED = 'CANCELLED',
 }
 export enum OrderType {
   MARKET = 'MARKET',
-  LIMIT = 'LIMIT',  
+  LIMIT = 'LIMIT', 
+  STOP='STOP'
 }

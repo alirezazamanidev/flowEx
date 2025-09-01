@@ -4,22 +4,22 @@ import { CryptoSymbolsUSD } from '../contracts/crypto-chanell';
 import { REDIS_CLIENT } from 'src/configs/redis.config';
 import Redis from 'ioredis';
 import { MarketGateway } from '../market.gateway';
+import { CandleService } from './candle.service';
+import { CandleType } from '../types/crypto.type';
 
 @Injectable()
 export class NobitexRealtimeService implements OnModuleInit {
   private client: Centrifuge;
   private logger = new Logger(NobitexRealtimeService.name);
   private USDSymbols = CryptoSymbolsUSD;
-  private readonly redisPub: Redis;
-  constructor(private readonly gateway: MarketGateway) {
-    this.redisPub = new Redis();
-  }
+  constructor(private candleService:CandleService){}
 
   onModuleInit() {
     this.connect();
     this.subscribeAllCandles();
   }
 
+  
   private connect() {
     this.client = new Centrifuge('wss://ws.nobitex.ir/connection/websocket');
 
@@ -39,6 +39,7 @@ export class NobitexRealtimeService implements OnModuleInit {
     this.client.connect();
   }
 
+
   async subscribeAllCandles() {
     const resolutions = ['1','3', '5', '60'];
     const channels = this.USDSymbols.flatMap((symbol) =>
@@ -51,7 +52,7 @@ export class NobitexRealtimeService implements OnModuleInit {
       for (const chanel of channels) {
       const sub = this.client.newSubscription(chanel.channel);
       sub.on('publication', async ({ data }) => {
-        const candle = {
+        const candle:CandleType = {
           symbol: data.symbol || chanel.symbol,
           time: data.t,
           open: data.o ?? 0,
@@ -61,14 +62,7 @@ export class NobitexRealtimeService implements OnModuleInit {
           volume: data.v ?? 0,
         };
 
-        await this.redisPub.set(
-          `candle:${candle.symbol}:${chanel.resolution}`,
-          JSON.stringify(candle),
-        );
-        await this.redisPub.publish(
-          `candle:${candle.symbol}:${chanel.resolution}`,
-          JSON.stringify(candle),
-        );
+        await this.candleService.save(chanel.symbol,chanel.resolution,candle);
       });
       sub.subscribe();
     }
