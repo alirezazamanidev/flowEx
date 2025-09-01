@@ -1,8 +1,10 @@
 import { BaseEntity } from "src/common/abstracts/baseEntity.abstract";
-import { Column, CreateDateColumn, Entity, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, Index, UpdateDateColumn } from "typeorm";
 import { OrderSide, OrderStatus, OrderType } from "../enums/order.enum";
 
 @Entity('order')
+@Index('idx_user_currency_status', ['userId', 'currency', 'status'])
+
 export class OrderEntity extends BaseEntity {
   @Column()
   userId: string;
@@ -19,8 +21,8 @@ export class OrderEntity extends BaseEntity {
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.OPEN })
   status: string
   
-  @Column({ type: 'numeric', precision: 30, scale: 10 })
-  volume: number;
+  @Column({ type: 'numeric', precision: 30, scale: 10,default:0 })
+  amount: number;
   @Column({ type: 'numeric', precision: 30, scale: 10, nullable: true })
   targetPrice: number | null;
   @Column({ type: 'numeric', precision: 30, scale: 10, nullable: true })

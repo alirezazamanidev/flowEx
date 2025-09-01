@@ -4,20 +4,20 @@ import {
   OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
+  WebSocketServer,
 } from '@nestjs/websockets';
 import { OrderService } from './services/order.service';
 import { JwtService } from '@nestjs/jwt';
 import { Logger } from '@nestjs/common';
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { isJWT } from 'class-validator';
 
 @WebSocketGateway({ namespace: 'order' })
 export class OrderGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(OrderGateway.name);
-  constructor(
-   
-    private jwtService: JwtService,
-  ) {}
+  @WebSocketServer()
+  public server:Server
+  constructor(private jwtService: JwtService) {}
 
   async handleConnection(client: Socket) {
     await this.authenticate(client);
@@ -29,7 +29,6 @@ export class OrderGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client.leave(client.data.user.userId);
     this.logger.log(`Client disconnected: ${client.id}`);
   }
-
 
   async authenticate(client: Socket) {
     try {

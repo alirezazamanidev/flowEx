@@ -20,6 +20,7 @@ import {
 } from 'src/common/enums/messages.enum';
 import Redis from 'ioredis';
 import { Server } from 'socket.io';
+import Big from 'big.js';
 
 @Injectable({})
 export class WalletService {
@@ -65,13 +66,16 @@ export class WalletService {
       };
     });
   }
+  async chargeWallet(amountInIRR: number,userId: string) {
+    // تبدیل ریال به دلار (یا تتر)
+    const usdAmount = new Big(amountInIRR).div(100_000);
 
-  async chargeWallet(amount: number, userId: string) {
-    return await this.dataSource.transaction(async (manager) => {
+    return await this.dataSource.transaction(async (manager: EntityManager) => {
       const wallet = await this.getOrCreateWallet(userId, 'USD', manager);
 
-      wallet.balance = amount / 100_000;
-      await manager.save(wallet);
+      wallet.balance = new Big(wallet.balance).plus(usdAmount).toNumber();
+      
+      return await manager.save(wallet);
     });
   }
 }
