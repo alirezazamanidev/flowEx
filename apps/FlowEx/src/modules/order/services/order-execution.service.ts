@@ -1,7 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { WalletService } from './wallet.service';
-import { OrderSide, OrderStatus } from '../enums/order.enum';
+import { OrderSide, OrderStatus, OrderType } from '../enums/order.enum';
 import { WalletEntity } from 'src/modules/wallet/entities/wallet.entity';
 import Big from 'big.js';
 import { OrderEntity } from '../entities/order.entity';
@@ -22,9 +22,8 @@ export class OrderExecutionService {
   ) {}
 
   async checkLimitOrders(currency: string, currentPrice: number) {
-    
     for (const side of [OrderSide.BUY, OrderSide.SELL]) {
-      const key = `order:limit:${side}:${currency}`
+      const key = `order:limit:${side}:${currency}`;
       const orderIds = await this.redisClient.zrangebyscore(
         key,
         currentPrice,
@@ -32,7 +31,10 @@ export class OrderExecutionService {
       );
 
       for (const orderId of orderIds) {
-        await this.orderLimitQueue.add('execute-limit-order', { orderId, currentPrice });
+        await this.orderLimitQueue.add('execute-limit-order', {
+          orderId,
+          currentPrice,
+        });
         await this.redisClient.zrem(key, orderId);
       }
     }
@@ -40,7 +42,9 @@ export class OrderExecutionService {
   async executeLimitOrder(orderId: string, currentPrice: number) {
     const order = await this.dataSource
       .getRepository(OrderEntity)
-      .findOne({ where: { id: orderId } });
+      .findOne({
+        where: { id: orderId, status: OrderStatus.OPEN, type: OrderType.LIMIT },
+      });
     if (!order || order.status !== OrderStatus.OPEN) return;
 
     await this.dataSource.transaction(async (manager) => {
