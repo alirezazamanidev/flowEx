@@ -9,6 +9,8 @@ import { ContentTypeEnum } from '../../common/enums/form.enum';
 import { GrpcPackageNames } from '../../common/enums/grpc.enum';
 import { AUTH_SERVICE_NAME, AuthServiceClient } from '@app/common';
 import type{ ClientGrpc } from '@nestjs/microservices';
+import { SignInDto } from './dtos/signIn.dto';
+import { CheckOtpDto } from './dtos/check-otp.dto';
 
 @Controller('auth')
 export class AuthController implements OnModuleInit {
@@ -27,19 +29,19 @@ private authServiceClient: AuthServiceClient;
   signUp(@Body() dto: SignUpDto) {
     return this.authServiceClient.signUp(dto);
   }
-  // @ApiOperation({ summary: 'signIn' })
-  // @HttpCode(HttpStatus.OK)
-  // @ApiConsumes(ContentTypeEnum.Form, ContentTypeEnum.Json)
-  // @Post('signin')
-  // signin(@Body() dto: SignInDto) {
-  //   return this.authService.signIn(dto);
-  // }
+  @ApiOperation({ summary: 'signIn' })
+  @HttpCode(HttpStatus.OK)
+  @ApiConsumes(ContentTypeEnum.Form, ContentTypeEnum.Json)
+  @Post('signin')
+  signin(@Body() dto: SignInDto) {
+    return this.authServiceClient.signIn(dto);
+  }
 
-  // @ApiOperation({ summary: 'check otp and verify email' })
-  // @HttpCode(HttpStatus.OK)
-  // @ApiConsumes(ContentTypeEnum.Form, ContentTypeEnum.Json)
-  // @Post('check-otp')
-  // checkOtp(@Body() dto: CheckOtpDto) {
-  //   return this.authService.checkOtp(dto);
-  // }
+  @ApiOperation({ summary: 'check otp and verify email' })
+  @HttpCode(HttpStatus.OK)
+  @ApiConsumes(ContentTypeEnum.Form, ContentTypeEnum.Json)
+  @Post('check-otp')
+  checkOtp(@Body() dto: CheckOtpDto) {
+    return this.authServiceClient.checkOtp(dto);
+  }
 }

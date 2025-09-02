@@ -1,30 +1,26 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
-import { AuthService } from './services/auth.service';
+
 
 import { GrpcMethod } from '@nestjs/microservices';
-import type { signUpDto, signUpResponse } from '@app/common';
+import type { signUpDto, AuthResponse, signInDto, CheckOtpDto } from '@app/common';
+import { AuthService } from './services/auth.service';
 
 @Controller()
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
   @GrpcMethod('AuthService', 'SignUp')
-  signUp(dto: signUpDto): Promise<signUpResponse> {
+  signUp(dto: signUpDto): Promise<AuthResponse> {
     return this.authService.signUp(dto);
   }
 
-  // @ApiOperation({ summary: 'signIn' })
-  // @HttpCode(HttpStatus.OK)
-  // @ApiConsumes(ContentTypeEnum.Form, ContentTypeEnum.Json)
-  // @Post('signin')
-  // signin(@Body() dto: SignInDto) {
-  //   return this.authService.signIn(dto);
-  // }
+  @GrpcMethod('AuthService','SignIn')
+  signin(@Body() dto: signInDto) {
+    return this.authService.signIn(dto);
+  }
 
-  // @ApiOperation({ summary: 'check otp and verify email' })
-  // @HttpCode(HttpStatus.OK)
-  // @ApiConsumes(ContentTypeEnum.Form, ContentTypeEnum.Json)
-  // @Post('check-otp')
-  // checkOtp(@Body() dto: CheckOtpDto) {
-  //   return this.authService.checkOtp(dto);
-  // }
+
+  @GrpcMethod('AuthService','CheckOtp')
+  checkOtp(@Body() dto: CheckOtpDto) {
+    return this.authService.checkOtp(dto);
+  }
 }
