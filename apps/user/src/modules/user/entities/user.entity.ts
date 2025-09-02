@@ -1,6 +1,5 @@
-import { BaseEntity } from 'src/common/abstracts/baseEntity.abstract';
-import { TransactionEntity } from 'src/modules/transaction/entities/transaction.entity';
-import { WalletEntity } from 'src/modules/wallet/entities/wallet.entity';
+
+import { BaseEntity } from 'apps/user/src/common/abstracts/baseEntity.abstract';
 import {
   Column,
   CreateDateColumn,
@@ -25,8 +24,5 @@ export class UserEntity extends BaseEntity {
   created_at: Date;
   @UpdateDateColumn()
   updated_at: Date;
-  @OneToMany(() => WalletEntity, (wallet) => wallet.user)
-  wallets: WalletEntity[];
-  @OneToMany(() => TransactionEntity, (transaction) => transaction.user)
-  transactions: TransactionEntity[];
+
 }

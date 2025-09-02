@@ -1,6 +1,7 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { HttpStatus, Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { JwtPayload } from "../types/jwtPayload.type";
+import { RpcException } from "@nestjs/microservices";
 
 @Injectable()
 export class TokenService {
@@ -10,7 +11,7 @@ export class TokenService {
         try {
             return this.jwtService.sign(payload,{secret:process.env.JWT_SECRET_KEY,expiresIn:'7d'})
         } catch (error) {
-            throw new UnauthorizedException(error.message)
+            throw new RpcException({message:error.message,statusCode:HttpStatus.UNAUTHORIZED})
         }
 
     }
@@ -18,7 +19,8 @@ export class TokenService {
         try {
             return this.jwtService.verify(token, { secret: process.env.JWT_SECRET_KEY });
         } catch (error) {
-            throw new UnauthorizedException(error.message);
+            throw new RpcException({message:error.message,statusCode:HttpStatus.UNAUTHORIZED})
+        
         }
     }
 }

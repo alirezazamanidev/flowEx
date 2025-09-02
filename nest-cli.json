@@ -1,25 +1,19 @@
 {
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
-  "sourceRoot": "apps/FlowEx/src",
+  "sourceRoot": "apps/gateway",
   "compilerOptions": {
     "deleteOutDir": true,
     "webpack": true,
-    "assets": ["**/*.proto"],
-    "tsConfigPath": "apps/FlowEx/tsconfig.app.json"
+    "tsConfigPath": "apps/gateway/tsconfig.app.json",
+    "assets": [
+      "**/*.proto"
+    ],
+    "watchAssets": true
   },
   "monorepo": true,
-  "root": "apps/FlowEx",
+  "root": ".",
   "projects": {
-    "FlowEx": {
-      "type": "application",
-      "root": "apps/FlowEx",
-      "entryFile": "main",
-      "sourceRoot": "apps/FlowEx/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/FlowEx/tsconfig.app.json"
-      }
-    },
     "gateway": {
       "type": "application",
       "root": "apps/gateway",
@@ -27,6 +21,24 @@
       "sourceRoot": "apps/gateway/src",
       "compilerOptions": {
         "tsConfigPath": "apps/gateway/tsconfig.app.json"
+      }
+    },
+    "types": {
+      "type": "library",
+      "root": "libs/types",
+      "entryFile": "index",
+      "sourceRoot": "libs/types/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/types/tsconfig.lib.json"
+      }
+    },
+    "user": {
+      "type": "application",
+      "root": "apps/user",
+      "entryFile": "main",
+      "sourceRoot": "apps/user/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/user/tsconfig.app.json"
       }
     }
   }

@@ -1,0 +1,20 @@
+
+syntax = "proto3";
+
+package user;
+
+message SignUpDto {
+  string username = 1;
+  string email = 2;
+  string password = 3;
+}
+
+message SignUpResponse {
+  string message = 1;
+}
+
+message Empty {}
+service AuthService {
+  rpc SignUp(SignUpDto) returns (SignUpResponse);
+
+}

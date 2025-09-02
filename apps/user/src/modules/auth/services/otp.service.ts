@@ -1,14 +1,20 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { AuthMessages } from '@app/common';
+import {
+  HttpStatus,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
+import { REDIS_CLIENT } from 'apps/user/src/configs/redis.config';
 import { randomInt } from 'crypto';
 import Redis from 'ioredis';
-import { AuthMessages } from 'src/common/enums/messages.enum';
-import { REDIS_CLIENT } from 'src/configs/redis.config';
 
 @Injectable()
 export class OtpService {
   private readonly OTP_EXPIRATION_MINUTES =
     process.env.OTP_EXPIRATION_MINUTES || 5;
-   
+
   constructor(@Inject(REDIS_CLIENT) private redisClient: Redis) {}
 
   generateOtp(): string {
@@ -16,21 +22,31 @@ export class OtpService {
   }
   async saveOtp(key: string): Promise<string> {
     const otpCached = await this.redisClient.get(`otp:${key}`);
-    if (otpCached) throw new UnauthorizedException(AuthMessages.OtpNotExpired);
+    if (otpCached) throw new RpcException({
+        message: AuthMessages.OtpNotExpired,
+        statusCode: HttpStatus.UNAUTHORIZED,
+      });
     const otpCode = this.generateOtp();
 
     await this.redisClient.setex(
       `otp:${key}`,
       this.OTP_EXPIRATION_MINUTES * 60,
-      otpCode
+      otpCode,
     );
     return otpCode;
   }
   async verify(key: string, code: string) {
     const otpCached = await this.redisClient.get(`otp:${key}`);
     if (!otpCached)
-      throw new UnauthorizedException(AuthMessages.OtpCodeExpired);
-    if (otpCached !== code) throw new UnauthorizedException(AuthMessages);
+       throw new RpcException({
+        message: AuthMessages.OtpCodeExpired,
+        statusCode: HttpStatus.UNAUTHORIZED,
+      });
+    if (otpCached !== code)
+      throw new RpcException({
+        message: AuthMessages.OtpCodeInvalid,
+        statusCode: HttpStatus.UNAUTHORIZED,
+      });
     return true;
   }
 }
