@@ -2,7 +2,7 @@ import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 
 
 import { GrpcMethod } from '@nestjs/microservices';
-import type { signUpDto, AuthResponse, signInDto, CheckOtpDto } from '@app/common';
+import type { signUpDto, AuthResponse, signInDto, CheckOtpDto, ValidateJWtTokenDto } from '@app/common';
 import { AuthService } from './services/auth.service';
 
 @Controller()
@@ -22,5 +22,9 @@ export class AuthController {
   @GrpcMethod('AuthService','CheckOtp')
   checkOtp(@Body() dto: CheckOtpDto) {
     return this.authService.checkOtp(dto);
+  }
+  @GrpcMethod('AuthService','ValidateJwtToken')
+  validateJwtToken(dto:ValidateJWtTokenDto){
+    return this.authService.validateJwtToken(dto.token);
   }
 }

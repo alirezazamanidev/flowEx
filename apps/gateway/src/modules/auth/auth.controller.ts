@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Inject, OnModuleInit, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Inject, OnModuleInit, Post, Req } from '@nestjs/common';
 
 import { ApiConsumes, ApiOperation } from '@nestjs/swagger';
 import { SignUpDto } from './dtos/signUp.dto';
@@ -11,6 +11,8 @@ import { AUTH_SERVICE_NAME, AuthServiceClient } from '@app/common';
 import type{ ClientGrpc } from '@nestjs/microservices';
 import { SignInDto } from './dtos/signIn.dto';
 import { CheckOtpDto } from './dtos/check-otp.dto';
+import type{ Request } from 'express';
+import { Auth } from './decorators/auth.decourator';
 
 @Controller('auth')
 export class AuthController implements OnModuleInit {
@@ -43,5 +45,12 @@ private authServiceClient: AuthServiceClient;
   @Post('check-otp')
   checkOtp(@Body() dto: CheckOtpDto) {
     return this.authServiceClient.checkOtp(dto);
+  }
+  @ApiOperation({summary:'get user pyload'})
+  @Get('/whoiam')
+  @Auth()
+  userPayload(@Req() req:Request){
+    return req.user
+
   }
 }

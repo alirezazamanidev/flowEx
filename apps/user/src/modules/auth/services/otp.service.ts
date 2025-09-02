@@ -23,16 +23,17 @@ export class OtpService {
   async saveOtp(key: string): Promise<string> {
     const otpCached = await this.redisClient.get(`otp:${key}`);
     if (otpCached) throw new RpcException({
-        message: AuthMessages.OtpNotExpired,
-        statusCode: HttpStatus.UNAUTHORIZED,
+      message: AuthMessages.OtpNotExpired,
+      statusCode: HttpStatus.UNAUTHORIZED,
       });
-    const otpCode = this.generateOtp();
-
+      const otpCode = this.generateOtp();
+      
     await this.redisClient.setex(
       `otp:${key}`,
       this.OTP_EXPIRATION_MINUTES * 60,
       otpCode,
     );
+    console.log(otpCode)
     return otpCode;
   }
   async verify(key: string, code: string) {

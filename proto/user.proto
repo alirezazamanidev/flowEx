@@ -24,8 +24,17 @@ message VerifyOtpResponse{
 }
 message Empty {}
 
+message ValidateJWtTokenDto{
+  string token=1;
+}
+message UserPayload {
+  string id=3;
+  string email=1;
+  string username=2;
+}
 service AuthService {
   rpc SignUp(SignUpDto) returns (AuthResponse);
   rpc SignIn(SignInDto) returns (AuthResponse);
   rpc CheckOtp(CheckOtpDto) returns (VerifyOtpResponse);
+  rpc ValidateJwtToken(ValidateJWtTokenDto) returns (UserPayload);
 }

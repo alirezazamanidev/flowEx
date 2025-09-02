@@ -25,8 +25,13 @@ export interface VerifyOtpResponse {
   message: string;
   jwtToken:string
 }
+
+export interface ValidateJWtTokenDto{
+  token:string
+}
 export interface AuthServiceClient {
   signUp(data: signUpDto): Promise<AuthResponse>;
   signIn(dto: signInDto): Promise<AuthResponse>;
   checkOtp(dto: CheckOtpDto): Promise<VerifyOtpResponse>;
+  ValidateJwtToken(dto:ValidateJWtTokenDto):Promise<any>
 }
