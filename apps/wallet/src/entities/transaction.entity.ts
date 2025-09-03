@@ -1,16 +1,19 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { TransactionType } from '../common/enums/type.enum';
 import { TransactionStatus } from '../common/enums/status.enum';
 import { BaseEntity } from '../common/abstracts/baseEntity.abstract';
 
 @Entity('transaction')
 export class TransactionEntity extends BaseEntity {
- 
   @Column({ nullable: true })
-
   authority: string;
   @Column()
-  
   userId: string;
   @Column({ type: 'numeric', precision: 30, scale: 8 })
   amount: number;
@@ -34,6 +37,4 @@ export class TransactionEntity extends BaseEntity {
     onUpdate: 'CURRENT_TIMESTAMP',
   })
   updated_at: Date;
-
-
 }

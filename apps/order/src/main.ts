@@ -11,20 +11,21 @@ async function bootstrap() {
       options: {
         package: 'order',
         protoPath: join(process.cwd(), 'proto/order.proto'),
+        url:process.env.ORDER_GRPC_URL
       },
     },
   );
   await app.listen();
 
   console.log(`
-  🚀  User Service is UP & Running!
+  🚀  Order  Service is UP & Running!
   ----------------------------------
   📦 Service:   Order
   🔌 Protocol:  gRPC
+  🌍 Address: ${process.env.ORDER_GRPC_URL}
   📂 Proto:     proto/order.proto
   ----------------------------------
   ✅ Ready to accept gRPC requests!
   `);
-
 }
 bootstrap();

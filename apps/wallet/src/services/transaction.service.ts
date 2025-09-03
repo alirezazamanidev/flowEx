@@ -21,15 +21,17 @@ export class TransactionService {
     await manager.save(transaction);
     return transaction;
   }
-  async getGatewayUrl(manager: EntityManager, userId: string, amount: number) {
+  async getGatewayUrl(
+    manager: EntityManager,
+    userId:string,
+    email: string,
+    amount: number,
+  ) {
     // create transaction
     const transaction = await this.create(manager, userId, amount);
     // create gateway url
-    const { authority } = await this.zarinpalService.sendRequest(
-      amount,
-      userId,
-    );
-    await manager.update(TransactionEntity, { id: transaction }, { authority });
+    const { authority } = await this.zarinpalService.sendRequest(amount, email);
+    await manager.update(TransactionEntity, { id: transaction.id }, { authority });
     return `${process.env.ZARINPAL_START_PAY_URL}${authority}`;
   }
 }

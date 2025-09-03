@@ -1,15 +1,15 @@
 syntax = "proto3";
 
 package wallet;
-
-message depositDto{
-    string userId=1;
+import "user.proto";
+message DepositDto{
+    user.User user=1;
     string amount=2;
+
 }
-message depositResponse{
-    string message=1;
-    string gatewayUrl=2;
+message DepositResponse{
+    string gatewayUrl=1;
 }
 service WalletService {
-    rpc deposit(depositDto) returns (depositResponse);
-}
+  rpc Deposit (DepositDto) returns (DepositResponse);
+}   

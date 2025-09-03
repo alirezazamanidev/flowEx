@@ -14,13 +14,13 @@ export class AuthController {
   }
 
   @GrpcMethod('AuthService','SignIn')
-  signin(@Body() dto: signInDto) {
+  signin( dto: signInDto) {
     return this.authService.signIn(dto);
   }
 
 
   @GrpcMethod('AuthService','CheckOtp')
-  checkOtp(@Body() dto: CheckOtpDto) {
+  checkOtp( dto: CheckOtpDto) {
     return this.authService.checkOtp(dto);
   }
   @GrpcMethod('AuthService','ValidateJwtToken')

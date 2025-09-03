@@ -1,3 +1,4 @@
+import { Observable } from "rxjs";
 
 export const AUTH_SERVICE_NAME = 'AuthService';
 
@@ -33,5 +34,5 @@ export interface AuthServiceClient {
   signUp(data: signUpDto): Promise<AuthResponse>;
   signIn(dto: signInDto): Promise<AuthResponse>;
   checkOtp(dto: CheckOtpDto): Promise<VerifyOtpResponse>;
-  ValidateJwtToken(dto:ValidateJWtTokenDto):Promise<any>
+  ValidateJwtToken(dto:ValidateJWtTokenDto):Observable<any>
 }

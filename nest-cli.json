@@ -6,9 +6,7 @@
     "deleteOutDir": true,
     "webpack": true,
     "tsConfigPath": "apps/gateway/tsconfig.app.json",
-    "assets": [
-      "**/*.proto"
-    ],
+    "assets": ["**/*.proto"],
     "watchAssets": true
   },
   "monorepo": true,
@@ -20,7 +18,9 @@
       "entryFile": "main",
       "sourceRoot": "apps/gateway/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/gateway/tsconfig.app.json"
+        "tsConfigPath": "apps/gateway/tsconfig.app.json",
+        "assets": ["**/*.proto"],
+        "watchAssets": true
       }
     },
     "order": {
@@ -56,7 +56,11 @@
       "entryFile": "main",
       "sourceRoot": "apps/wallet/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/wallet/tsconfig.app.json"
+        "tsConfigPath": "apps/wallet/tsconfig.app.json",
+            "assets": [
+      "**/*.proto"
+    ],
+    "watchAssets": true
       }
     }
   }

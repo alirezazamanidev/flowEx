@@ -10,16 +10,18 @@ async function bootstrap() {
       options: {
         package: 'user',
         protoPath: join(process.cwd(), 'proto/user.proto'),
+        url:process.env.USER_GRPC_URL
       },
     },
   );
   await app.listen();
 
   console.log(`
-  🚀  User Service is UP & Running!
+  🚀  User  Service is UP & Running!
   ----------------------------------
   📦 Service:   User
   🔌 Protocol:  gRPC
+  🌍 Address: ${process.env.USER_GRPC_URL}
   📂 Proto:     proto/user.proto
   ----------------------------------
   ✅ Ready to accept gRPC requests!
