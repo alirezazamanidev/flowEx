@@ -9,6 +9,7 @@ import { EnvConfig } from './configs/env.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmDbConfig } from './configs/typeorm.config';
 import { TransactionEntity } from './entities/transaction.entity';
+import { WalletEntity } from './entities/wallet.entity';
 
 @Module({
   imports: [
@@ -17,7 +18,7 @@ import { TransactionEntity } from './entities/transaction.entity';
       useClass: TypeOrmDbConfig,
     }),
 
-    TypeOrmModule.forFeature([TransactionEntity]),
+    TypeOrmModule.forFeature([TransactionEntity,WalletEntity]),
     HttpModule.register({ timeout: 5000 }),
   ],
   controllers: [WalletController],

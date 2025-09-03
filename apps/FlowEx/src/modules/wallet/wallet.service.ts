@@ -14,10 +14,7 @@ import { TransactionType } from '../transaction/enums/type.enum';
 import { TransactionStatus } from '../transaction/enums/status.enum';
 import { REQUEST } from '@nestjs/core';
 import type { Request } from 'express';
-import {
-  BadRequestMessage,
-  NotFoundMessage,
-} from 'src/common/enums/messages.enum';
+
 import Redis from 'ioredis';
 import { Server } from 'socket.io';
 import Big from 'big.js';

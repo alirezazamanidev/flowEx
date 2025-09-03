@@ -1,17 +1,28 @@
 import { Controller, Get, OnModuleInit } from '@nestjs/common';
 import { WalletService } from '../services/wallet.service';
 import { GrpcMethod } from '@nestjs/microservices';
-import type { DepositDto, DepositResponse,  } from '@app/common';
+import type {
+  DepositDto,
+  DepositResponse,
+  verifyPaymentDto,
+  VerifyPaymentResponse,
+} from '@app/common';
+import { TransactionService } from '../services/transaction.service';
 
 @Controller()
 export class WalletController {
-  constructor(private readonly walletService: WalletService) {}
+  constructor(
+    private readonly walletService: WalletService,
+    private transactionService: TransactionService,
+  ) {}
 
-
-    @GrpcMethod('WalletService', 'Deposit')
+  @GrpcMethod('WalletService', 'Deposit')
   deposit(dto: DepositDto): Promise<DepositResponse> {
-  
     return this.walletService.Deposit(dto);
   }
-  
+  @GrpcMethod('WalletService', 'VerifyPayment')
+  async verifyPayment(dto: verifyPaymentDto): Promise<VerifyPaymentResponse> {
+    const url = await this.transactionService.verifyPayment(dto);
+    return { url };
+  }
 }

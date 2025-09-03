@@ -5,6 +5,7 @@ import {
   Inject,
   OnModuleInit,
   Post,
+  Query,
   Req,
 } from '@nestjs/common';
 import { GrpcPackageNames } from '../../common/enums/grpc.enum';
@@ -36,6 +37,12 @@ export class WalletController implements OnModuleInit {
       amount: depositDto.amount.toString(),
     });
   
+  }
+
+  @Get('callback')
+   callback(@Query('Authority') authority: string, @Query('Status') status: string) {
+    return this.walletServiceClient.verifyPayment({ authority, status });
+    
   }
 
 }
