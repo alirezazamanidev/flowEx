@@ -1,5 +1,7 @@
 
 export enum GrpcPackageNames {
     USER='USER_PACKAGE',
-    WALLET='WALLET_PACKAGE'
+    WALLET='WALLET_PACKAGE',
+    ORDER='ORDER_PACKAGE',
+    MARKET='MARKET_PACKAGE'
 }

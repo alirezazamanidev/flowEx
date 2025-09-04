@@ -6,7 +6,9 @@
     "deleteOutDir": true,
     "webpack": true,
     "tsConfigPath": "apps/gateway/tsconfig.app.json",
-    "assets": ["**/*.proto"],
+    "assets": [
+      "**/*.proto"
+    ],
     "watchAssets": true
   },
   "monorepo": true,
@@ -19,7 +21,22 @@
       "sourceRoot": "apps/gateway/src",
       "compilerOptions": {
         "tsConfigPath": "apps/gateway/tsconfig.app.json",
-        "assets": ["**/*.proto"],
+        "assets": [
+          "**/*.proto"
+        ],
+        "watchAssets": true
+      }
+    },
+    "market": {
+      "type": "application",
+      "root": "apps/market",
+      "entryFile": "main",
+      "sourceRoot": "apps/market/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/market/tsconfig.app.json",
+        "assets": [
+          "**/*.proto"
+        ],
         "watchAssets": true
       }
     },
@@ -30,6 +47,15 @@
       "sourceRoot": "apps/order/src",
       "compilerOptions": {
         "tsConfigPath": "apps/order/tsconfig.app.json"
+      }
+    },
+    "redis": {
+      "type": "library",
+      "root": "libs/redis",
+      "entryFile": "index",
+      "sourceRoot": "libs/redis/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/redis/tsconfig.lib.json"
       }
     },
     "types": {
@@ -57,10 +83,10 @@
       "sourceRoot": "apps/wallet/src",
       "compilerOptions": {
         "tsConfigPath": "apps/wallet/tsconfig.app.json",
-            "assets": [
-      "**/*.proto"
-    ],
-    "watchAssets": true
+        "assets": [
+          "**/*.proto"
+        ],
+        "watchAssets": true
       }
     }
   }

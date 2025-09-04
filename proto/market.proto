@@ -1,0 +1,21 @@
+
+syntax = "proto3";
+
+package market;
+message Candle {
+  string symbol = 1;
+  int64 time = 2;
+  double open = 3;
+  double high = 4;
+  double low = 5;
+  double close = 6;
+  double volume = 7;
+}
+message StreamCandlesRequest {
+  string symbol = 1;
+  string resolution = 2;
+}
+
+service MarketService {
+  rpc StreamCandles(StreamCandlesRequest) returns (stream Candle);
+}

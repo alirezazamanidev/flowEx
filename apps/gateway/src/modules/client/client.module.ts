@@ -5,6 +5,7 @@ import { USER_PACKAGE_NAME } from '@app/common/interfaces/auth';
 import { join } from 'path/win32';
 import { WALLET_PACKAGE_NAME } from '@app/common/interfaces/wallet';
 import {config} from 'dotenv';
+import { MARKET_PACKAGE_NAME } from '@app/common';
 config({
   path:['.env']
 });
@@ -29,6 +30,15 @@ config({
         package: WALLET_PACKAGE_NAME,
         protoPath: join(process.cwd(), 'proto/wallet.proto'),
         url: process.env.WALLET_GRPC_URL,
+      },
+    },
+      {
+      name: GrpcPackageNames.MARKET,
+      transport: Transport.GRPC,
+      options: {
+        package: MARKET_PACKAGE_NAME,
+        protoPath: join(process.cwd(), 'proto/market.proto'),
+        url: process.env.MARKET_GRPC_URL,
       },
     },
   ])],
