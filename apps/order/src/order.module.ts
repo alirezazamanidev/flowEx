@@ -9,6 +9,8 @@ import { OrderEntity } from './entities/order.entity';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { GrpcPackageNames, WALLET_PACKAGE_NAME } from '@app/common';
 import { join } from 'path';
+import { RedisModule } from '@app/redis';
+import { BullModule } from '@nestjs/bullmq';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { join } from 'path';
     }),
 
     TypeOrmModule.forFeature([OrderEntity]),
+    RedisModule.forRoot({url:process.env.REDIS_URL}),
+
     ClientsModule.register([
      {
           name:GrpcPackageNames.WALLET,

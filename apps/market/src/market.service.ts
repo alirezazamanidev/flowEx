@@ -3,12 +3,15 @@ import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ClientProxy, GrpcMethod } from '@nestjs/microservices';
 import { Centrifuge, Subscription } from 'centrifuge';
 import { Observable, Subject } from 'rxjs';
+import { SYMBOLS } from './common/contracts/crypto-symbol';
+import { REDIS_CLIENT } from '@app/redis';
+import Redis from 'ioredis';
 
 @Injectable()
 export class MarketService implements OnModuleInit {
   private client: Centrifuge;
   constructor(
-    @Inject('REDIS_CLIENT') private readonly Redisclient: ClientProxy,
+    @Inject(REDIS_CLIENT) private readonly redisClient:Redis ,
   ) {}
   onModuleInit() {
     this.connect();
@@ -18,6 +21,7 @@ export class MarketService implements OnModuleInit {
     this.client = new Centrifuge('wss://ws.nobitex.ir/connection/websocket');
     this.client.on('connected', () => {
       this.logger.log('✅ Connected to Nobitex WS');
+      this.publishOrderBook();
     });
 
     this.client.on('disconnected', () => {
@@ -30,6 +34,30 @@ export class MarketService implements OnModuleInit {
     });
 
     this.client.connect();
+  }
+  async publishOrderBook() {
+    for (const symbol of SYMBOLS) {
+      const channelName = `public:orderbook-${symbol}`;
+
+      let sub = this.client.getSubscription(channelName);
+      if (!sub) {
+        sub = this.client.newSubscription(channelName);
+        sub.subscribe();
+      }
+
+      sub.on('publication', async ({ data }) => {
+        const orderBook = {
+          asks: data.asks ?? [],
+          bids: data.bids ?? [],
+          lastTradePrice: data.lastTradePrice ?? '0',
+          lastUpdate: data.lastUpdate ?? Date.now(),
+        };
+
+        // پابلیش در Redis
+        await this.redisClient.publish(`orderbook:${symbol}`, JSON.stringify(orderBook));
+
+      });
+    }
   }
 
   StreamCandles(dto: StreamCandlesRequest): Observable<CandleData> {

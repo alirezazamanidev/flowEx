@@ -12,6 +12,8 @@ import { RpcException, type ClientGrpc } from '@nestjs/microservices';
 import { DataSource } from 'typeorm';
 import { OrderEntity } from './entities/order.entity';
 import { lastValueFrom } from 'rxjs';
+import { REDIS_CLIENT } from '@app/redis';
+import Redis from 'ioredis';
 
 @Injectable()
 export class OrderService implements OnModuleInit {
@@ -19,10 +21,13 @@ export class OrderService implements OnModuleInit {
   constructor(
     private dataSource: DataSource,
     @Inject(GrpcPackageNames.WALLET) private readonly client: ClientGrpc,
+    @Inject(REDIS_CLIENT) private readonly redisClient:Redis
   ) {}
   onModuleInit() {
     this.walletServiceClient =
       this.client.getService<WalletServiceClient>(WALLET_SERVICE_NAME);
+
+  
   }
   async createOrder(dto: CreateOrderRequest): Promise<CreateOrderResponse> {
     const { userId, side, percentOfWallet, targetPrice, currency } = dto;
@@ -48,7 +53,7 @@ export class OrderService implements OnModuleInit {
         side,
       });
       order = await manager.save(order);
-
+      await this.redisClient.zadd(`orderbook:${order.currency}:${order.side}`,targetPrice,order.id);
       return {
         message: 'order created!',
         orderId: order.id,
