@@ -8,9 +8,9 @@ import {
   Query,
   Req,
 } from '@nestjs/common';
-import { GrpcPackageNames } from '../../common/enums/grpc.enum';
+
 import type { ClientGrpc } from '@nestjs/microservices';
-import { WALLET_SERVICE_NAME, WalletServiceClient } from '@app/common';
+import { GrpcPackageNames, WALLET_SERVICE_NAME, WalletServiceClient } from '@app/common';
 import { ApiConsumes, ApiOperation } from '@nestjs/swagger';
 import { Auth } from '../auth/decorators/auth.decourator';
 import { ContentTypeEnum } from '../../common/enums/form.enum';
@@ -25,24 +25,23 @@ export class WalletController implements OnModuleInit {
   onModuleInit() {
     this.walletServiceClient =
       this.client.getService<WalletServiceClient>(WALLET_SERVICE_NAME);
-  
   }
   @ApiOperation({ summary: 'Deposit money into wallet' })
   @Auth()
   @ApiConsumes(ContentTypeEnum.Form, ContentTypeEnum.Json)
   @Post('deposit')
-   deposit(@Body() depositDto: DepositDto, @Req() req: Request) {
+  deposit(@Body() depositDto: DepositDto, @Req() req: Request) {
     return this.walletServiceClient.Deposit({
-      user:req.user,
+      user: req.user,
       amount: depositDto.amount.toString(),
     });
-  
   }
 
   @Get('callback')
-   callback(@Query('Authority') authority: string, @Query('Status') status: string) {
+  callback(
+    @Query('Authority') authority: string,
+    @Query('Status') status: string,
+  ) {
     return this.walletServiceClient.verifyPayment({ authority, status });
-    
   }
-
 }

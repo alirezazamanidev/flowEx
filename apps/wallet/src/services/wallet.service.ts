@@ -1,4 +1,5 @@
 import {
+  BadRequestMessage,
   OrderSide,
   type DepositDto,
   type LockFoudsResponse,
@@ -47,23 +48,23 @@ export class WalletService {
     });
   }
 
-  async lockFunds(dto: LockFundsRequest): Promise<LockFoudsResponse> {
+  async lockFunds(dto: LockFundsRequest){
     const { side, currency, percent, userId } = dto;
 
     if (percent <= 0 || percent > 100) {
       return { success: false, message: 'Invalid percent' };
     }
-
+    
     try {
       return await this.dataSource.transaction(async (manager) => {
         let currencyToUse = side === OrderSide.BUY ? 'USD' : currency;
 
         const wallet = await this.getOrCreateWallet(manager, userId, currencyToUse);
+        console.log(wallet)
         const available = Big(wallet.balance).minus(wallet.lockedBalance);
         const amountToUse = available.times(percent).div(100);
-
         if (amountToUse.lte(0)) {
-          return { success: false, message: 'Insufficient balance' };
+          return { success: false, message: BadRequestMessage.INSUFFICIENT_WALLET_BALANCE};
         }
 
         wallet.lockedBalance = Big(wallet.lockedBalance).plus(amountToUse).toNumber();

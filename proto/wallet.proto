@@ -35,5 +35,5 @@ message LockFundsResponse {
 service WalletService {
   rpc Deposit (DepositDto) returns (DepositResponse);
   rpc VerifyPayment(verifyPaymentDto) returns (VerifyPaymentResponse);
-  rpc LockFunds(LockFundsRequest) returns(LockFundsRequest);
+  rpc LockFunds(LockFundsRequest) returns(LockFundsResponse);
 }   

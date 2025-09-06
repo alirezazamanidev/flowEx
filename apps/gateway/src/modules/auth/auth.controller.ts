@@ -16,14 +16,14 @@ import { SignUpDto } from './dtos/signUp.dto';
 
 import { ContentTypeEnum } from '../../common/enums/form.enum';
 
-import { GrpcPackageNames } from '../../common/enums/grpc.enum';
-import { AUTH_SERVICE_NAME, AuthServiceClient } from '@app/common';
+
+import { AUTH_SERVICE_NAME, AuthServiceClient, GrpcPackageNames } from '@app/common';
 import { RpcException, type ClientGrpc } from '@nestjs/microservices';
 import { SignInDto } from './dtos/signIn.dto';
 import { CheckOtpDto } from './dtos/check-otp.dto';
 import type { Request } from 'express';
 import { Auth } from './decorators/auth.decourator';
-import { lastValueFrom } from 'rxjs';
+
 
 @Controller('auth')
 export class AuthController implements OnModuleInit {
@@ -55,9 +55,7 @@ export class AuthController implements OnModuleInit {
   @ApiConsumes(ContentTypeEnum.Form, ContentTypeEnum.Json)
   @Post('check-otp')
   checkOtp(@Body() dto: CheckOtpDto) {
-    
-      return this.authServiceClient.checkOtp(dto)
-   
+    return this.authServiceClient.checkOtp(dto);
   }
   @ApiOperation({ summary: 'get user pyload' })
   @Get('/whoiam')

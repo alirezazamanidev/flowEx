@@ -7,7 +7,7 @@ import { OrderController } from './order.controller';
 import { OrderService } from './order.service';
 import { OrderEntity } from './entities/order.entity';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { WALLET_PACKAGE_NAME } from '@app/common';
+import { GrpcPackageNames, WALLET_PACKAGE_NAME } from '@app/common';
 import { join } from 'path';
 
 @Module({
@@ -20,7 +20,7 @@ import { join } from 'path';
     TypeOrmModule.forFeature([OrderEntity]),
     ClientsModule.register([
      {
-          name: 'WALLET',
+          name:GrpcPackageNames.WALLET,
           transport: Transport.GRPC,
           options: {
             package: WALLET_PACKAGE_NAME,

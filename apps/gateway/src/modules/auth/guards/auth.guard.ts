@@ -11,7 +11,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import type { ClientGrpc } from '@nestjs/microservices';
-import { GrpcPackageNames } from 'apps/gateway/src/common/enums/grpc.enum';
+import { GrpcPackageNames } from '@app/common/enums/grpc.enum';
 import { isJWT } from 'class-validator';
 import { Request } from 'express';
 import { lastValueFrom } from 'rxjs';

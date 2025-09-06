@@ -1,3 +1,4 @@
+import { Observable } from 'rxjs';
 import { Empty } from './auth';
 import { User } from './user';
 
@@ -30,7 +31,7 @@ export interface LockFoudsResponse{
 export interface WalletServiceClient {
   Deposit(dto: DepositDto): Promise<DepositResponse>;
  verifyPayment(dto:verifyPaymentDto):Promise<VerifyPaymentResponse>
- lockFunds(dto:LockFundsRequest):Promise<LockFoudsResponse>
+ lockFunds(dto:LockFundsRequest):Observable<LockFoudsResponse>
 }
 export const WALLET_PACKAGE_NAME = 'wallet';
 export const WALLET_SERVICE_NAME = 'WalletService';

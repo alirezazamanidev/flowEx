@@ -9,8 +9,8 @@ import {
 } from '@nestjs/websockets';
 import { Inject, OnModuleInit } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
-import { MARKET_SERVICE_NAME, MarketServiceClient } from '@app/common';
-import { GrpcPackageNames } from '../../common/enums/grpc.enum';
+import { GrpcPackageNames, MARKET_SERVICE_NAME, MarketServiceClient } from '@app/common';
+
 import type { ClientGrpc } from '@nestjs/microservices';
 
 @WebSocketGateway({ namespace: 'market' })

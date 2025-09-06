@@ -28,8 +28,8 @@ export class WalletController {
     return { url };
   }
   @GrpcMethod('WalletService','LockFunds')
-  lockFunds(dto:LockFundsRequest):Promise<LockFoudsResponse>{
-    console.log(dto)
+  lockFunds(dto:LockFundsRequest){
+    
     return this.walletService.lockFunds(dto)
   }
 }
