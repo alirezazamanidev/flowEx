@@ -1,4 +1,9 @@
-import type { DepositDto } from '@app/common';
+import {
+  OrderSide,
+  type DepositDto,
+  type LockFoudsResponse,
+  type LockFundsRequest,
+} from '@app/common';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { DataSource, EntityManager } from 'typeorm';
 import { TransactionService } from './transaction.service';
@@ -10,24 +15,10 @@ import { WalletEntity } from '../entities/wallet.entity';
 export class WalletService {
   constructor(
     private dataSource: DataSource,
-     @Inject(forwardRef(() => TransactionService))
+    @Inject(forwardRef(() => TransactionService))
     private transactionService: TransactionService,
   ) {}
-    async getOrCreateWallet(
-      userId: string,
-      currency: string,
-      manager: EntityManager,
-    ) {
-      let wallet = await manager.findOne(WalletEntity, {
-        where: { userId, currency },
-      });
-      if (!wallet) {
-        wallet = manager.create(WalletEntity, { userId, currency, balance: 0 });
-        wallet = await manager.save(wallet);
-      }
-      return wallet;
-    }
-  
+
   async Deposit(dto: DepositDto) {
     const { amount, user } = dto;
 
@@ -43,16 +34,73 @@ export class WalletService {
       };
     });
   }
-    async chargeWallet(amountInIRR: number,userId: string) {
-      // تبدیل ریال به دلار (یا تتر)
-      const usdAmount = new Big(amountInIRR).div(100_000);
-  
-      return await this.dataSource.transaction(async (manager: EntityManager) => {
-        const wallet = await this.getOrCreateWallet(userId, 'USD', manager);
-  
-        wallet.balance = new Big(wallet.balance).plus(usdAmount).toNumber();
-        
-        return await manager.save(wallet);
-      });
+  async chargeWallet(amountInIRR: number, userId: string) {
+    // تبدیل ریال به دلار (یا تتر)
+    const usdAmount = new Big(amountInIRR).div(100_000);
+
+    return await this.dataSource.transaction(async (manager: EntityManager) => {
+      const wallet = await this.getOrCreateWallet(manager, userId, 'USD');
+
+      wallet.balance = new Big(wallet.balance).plus(usdAmount).toNumber();
+
+      return await manager.save(wallet);
+    });
+  }
+
+  async lockFunds(dto: LockFundsRequest): Promise<LockFoudsResponse> {
+    const { side, currency, percent, userId } = dto;
+
+    if (percent <= 0 || percent > 100) {
+      return { success: false, message: 'Invalid percent' };
     }
+
+    try {
+      return await this.dataSource.transaction(async (manager) => {
+        let currencyToUse = side === OrderSide.BUY ? 'USD' : currency;
+
+        const wallet = await this.getOrCreateWallet(manager, userId, currencyToUse);
+        const available = Big(wallet.balance).minus(wallet.lockedBalance);
+        const amountToUse = available.times(percent).div(100);
+
+        if (amountToUse.lte(0)) {
+          return { success: false, message: 'Insufficient balance' };
+        }
+
+        wallet.lockedBalance = Big(wallet.lockedBalance).plus(amountToUse).toNumber();
+        await manager.save(wallet);
+
+        return {
+          success: true,
+          message: 'Funds reserved',
+          amount: amountToUse.toNumber(), // string برای حفظ precision
+        };
+      });
+    } catch (err) {
+      console.error('LockFunds transaction failed', err);
+      return { success: false, message: 'Internal error' };
+    }
+  }
+
+
+  private async getOrCreateWallet(
+    manager: EntityManager,
+    userId: string,
+    currency: string,
+  ) {
+    let wallet = await manager
+      .createQueryBuilder(WalletEntity, 'w')
+      .setLock('pessimistic_write')
+      .where('w.userId = :userId AND w.currency = :currency', {
+        userId,
+        currency,
+      })
+      .getOne();
+
+    if (!wallet) {
+      wallet = manager.create(WalletEntity, { userId, currency, balance: 0 });
+      await manager.save(wallet);
+    }
+
+    return wallet;
+  }
 }

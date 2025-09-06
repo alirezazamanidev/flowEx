@@ -17,7 +17,23 @@ message verifyPaymentDto {
 message VerifyPaymentResponse {
     string url=1;
 }
+
+message LockFundsRequest {
+  string userId = 1;
+  string currency=2;
+  double percent = 3;
+  string side =4;
+}
+
+message LockFundsResponse {
+  bool success = 1;
+  string message=2;
+  double amount = 4;
+
+}
+
 service WalletService {
   rpc Deposit (DepositDto) returns (DepositResponse);
   rpc VerifyPayment(verifyPaymentDto) returns (VerifyPaymentResponse);
+  rpc LockFunds(LockFundsRequest) returns(LockFundsRequest);
 }   

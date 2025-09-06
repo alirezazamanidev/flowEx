@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { OrderModule } from './order.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
+import { ORDER_PACKAGE_NAME } from '@app/common/interfaces/order';
 
 async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
@@ -9,7 +10,7 @@ async function bootstrap() {
     {
       transport: Transport.GRPC,
       options: {
-        package: 'order',
+        package: ORDER_PACKAGE_NAME,
         protoPath: join(process.cwd(), 'proto/order.proto'),
         url:process.env.ORDER_GRPC_URL
       },

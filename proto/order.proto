@@ -2,10 +2,18 @@ syntax = "proto3";
 
 package order;
 
-message CreatedOrderDto{
-    string userId=1;
+message CreateOrderRequest {
+    string userId = 1;
+    string currency = 2;
+    string side = 3;
+    double targetPrice = 4;
+    double percentOfWallet = 5;
 }
-service OrderService{
-
-    rpc Create(CreatedOrderDto) returns(CreatedOrderDto);
+message CreateOrderResponse {
+    string orderId = 1;
+    bool success = 2; 
+    string message = 3;
+}
+service OrderService {
+    rpc CreateOrder (CreateOrderRequest) returns (CreateOrderResponse);
 }

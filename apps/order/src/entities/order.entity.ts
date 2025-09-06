@@ -16,10 +16,6 @@ export class OrderEntity extends BaseEntity {
 
   @Column({ type: 'enum', enum: OrderSide })
   side: string;
-
-  @Column({ type: 'enum', enum: OrderType, default: OrderType.MARKET })
-  type: string // MARKET | LIMIT | STOP
-
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.OPEN })
   status: string
   

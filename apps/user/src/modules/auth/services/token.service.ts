@@ -11,7 +11,7 @@ export class TokenService {
         try {
             return this.jwtService.sign(payload,{secret:process.env.JWT_SECRET_KEY,expiresIn:'7d'})
         } catch (error) {
-            throw new RpcException({message:error.message,statusCode:HttpStatus.UNAUTHORIZED})
+            throw new RpcException({message:error.message,code:HttpStatus.UNAUTHORIZED})
         }
 
     }
@@ -19,7 +19,7 @@ export class TokenService {
         try {
             return this.jwtService.verify(token, { secret: process.env.JWT_SECRET_KEY });
         } catch (error) {
-            throw new RpcException({message:error.message,statusCode:HttpStatus.UNAUTHORIZED})
+            throw new RpcException({message:error.message,code:HttpStatus.UNAUTHORIZED})
         
         }
     }

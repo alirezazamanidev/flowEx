@@ -6,6 +6,7 @@ import { join } from 'path/win32';
 import { WALLET_PACKAGE_NAME } from '@app/common/interfaces/wallet';
 import {config} from 'dotenv';
 import { MARKET_PACKAGE_NAME } from '@app/common';
+import { ORDER_PACKAGE_NAME } from '@app/common/interfaces/order';
 config({
   path:['.env']
 });
@@ -21,6 +22,16 @@ config({
         protoPath: join(process.cwd(), 'proto/user.proto'),
         url:process.env.USER_GRPC_URL,
         
+      },
+    },
+     {
+      name: GrpcPackageNames.ORDER,
+      transport: Transport.GRPC,
+      options: {
+        package: ORDER_PACKAGE_NAME,
+        protoPath: join(process.cwd(), 'proto/order.proto'),
+        url:process.env.ORDER_GRPC_URL,
+
       },
     },
     {

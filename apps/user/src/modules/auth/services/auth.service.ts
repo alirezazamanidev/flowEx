@@ -77,7 +77,7 @@ export class AuthService{
     if (!user || !compareSync(password, user.hashedPassword))
       throw new RpcException({
         message: AuthMessages.InvalidCredentials,
-        statusCode: HttpStatus.UNAUTHORIZED,
+        code: HttpStatus.UNAUTHORIZED,
       });
     // create and send otp
     const otpCode = await this.otpService.saveOtp(email);
@@ -89,7 +89,7 @@ export class AuthService{
   async checkOtp(dto: CheckOtpDto) {
     const { email, otpCode } = dto;
     const user = await this.userRepository.findOne({ where: { email } });
-    if (!user) throw new RpcException({message:NotFoundMessage.user})
+    if (!user) throw new RpcException({message:NotFoundMessage.user,code:HttpStatus.NOT_FOUND})
     // verify otp
     await this.otpService.verify(user.email, otpCode);
     // update user
@@ -113,7 +113,7 @@ export class AuthService{
       where: { id: userId },
       select: ['id', 'email', 'isEmailVerifyed', 'created_at'],
     });
-    if (!user) throw new RpcException({message:NotFoundMessage.user,statusCode:HttpStatus.NOT_FOUND});
+    if (!user) throw new RpcException({message:NotFoundMessage.user,code:HttpStatus.NOT_FOUND});
     return user;
   }
 }

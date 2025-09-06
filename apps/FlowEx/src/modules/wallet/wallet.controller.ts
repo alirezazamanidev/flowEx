@@ -4,6 +4,7 @@ import { ApiConsumes, ApiOperation } from '@nestjs/swagger';
 
 import { DepositDto } from './dto/deposit.dto';
 import { Auth } from 'apps/gateway/src/modules/auth/decorators/auth.decourator';
+import { ContentTypeEnum } from '../../common/enums/form.enum';
 
 @Controller('wallet')
 export class WalletController {
@@ -11,7 +12,7 @@ export class WalletController {
 
   @ApiOperation({summary:'Deposit money into wallet'})
   @Auth()
-  @ApiConsumes(ContentTypeEnu.Form,ContentTypeEnum.Json)
+  @ApiConsumes(ContentTypeEnum.Form,ContentTypeEnum.Json)
   @Post('deposit')
   deposit(@Body() depositDto: DepositDto) {
     return this.walletService.deposit(depositDto);

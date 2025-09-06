@@ -41,16 +41,13 @@ export class MarketGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() dto: { symbol: string; resolution: string },
   ) {
-    
     this.marketServiceClinet.streamCandles(dto).subscribe({
       next: (candle) => {
-        
-       client.emit('candle', candle);
+        client.emit('candle', candle);
       },
       error: (err) => {
         console.log(err);
         client.emit('error', err);
-     
       },
     });
   }

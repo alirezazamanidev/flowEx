@@ -7,6 +7,7 @@ import { ClientGlobalModule } from './modules/client/client.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { WalletModule } from './modules/wallet/wallet.module';
 import { MarketModule } from './modules/market/market.module';
+import { OrderModule } from './modules/order/order.module';
 @Module({
   imports: [
     ConfigModule.forRoot(EnvConfig),
@@ -14,6 +15,7 @@ import { MarketModule } from './modules/market/market.module';
     AuthModule,
     WalletModule,
     MarketModule,
+    OrderModule,
   ],
 })
 export class GatewayModule {}

@@ -4,6 +4,8 @@ import { GrpcMethod } from '@nestjs/microservices';
 import type {
   DepositDto,
   DepositResponse,
+  LockFoudsResponse,
+  LockFundsRequest,
   verifyPaymentDto,
   VerifyPaymentResponse,
 } from '@app/common';
@@ -24,5 +26,10 @@ export class WalletController {
   async verifyPayment(dto: verifyPaymentDto): Promise<VerifyPaymentResponse> {
     const url = await this.transactionService.verifyPayment(dto);
     return { url };
+  }
+  @GrpcMethod('WalletService','LockFunds')
+  lockFunds(dto:LockFundsRequest):Promise<LockFoudsResponse>{
+    console.log(dto)
+    return this.walletService.lockFunds(dto)
   }
 }

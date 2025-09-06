@@ -1,14 +1,17 @@
 import { NestFactory } from '@nestjs/core';
 import { GatewayModule } from './gateway.module';
-import { getGlobalFilters } from 'apps/FlowEx/src/common/filters';
-import { HttpValidationPipe } from 'apps/FlowEx/src/common/pipes/validation.pipe';
+
 import { SwaggerConfig } from './configs/swagger.config';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { HttpValidationPipe } from './common/pipes/validation.pipe';
+import { getGlobalFilters } from './common/filters';
+import { RpcErrorInterceptor } from './common/interceptors/rpc-error.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(GatewayModule);
 
   app.setGlobalPrefix('api');
+  // app.useGlobalInterceptors(new RpcErrorInterceptor())
   app.useGlobalFilters(...getGlobalFilters());
   app.useGlobalPipes(new HttpValidationPipe());
   // swagger config

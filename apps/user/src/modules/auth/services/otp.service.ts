@@ -24,7 +24,7 @@ export class OtpService {
     const otpCached = await this.redisClient.get(`otp:${key}`);
     if (otpCached) throw new RpcException({
       message: AuthMessages.OtpNotExpired,
-      statusCode: HttpStatus.UNAUTHORIZED,
+      code: HttpStatus.UNAUTHORIZED,
       });
       const otpCode = this.generateOtp();
       
@@ -41,12 +41,12 @@ export class OtpService {
     if (!otpCached)
        throw new RpcException({
         message: AuthMessages.OtpCodeExpired,
-        statusCode: HttpStatus.UNAUTHORIZED,
+        code: HttpStatus.UNAUTHORIZED,
       });
     if (otpCached !== code)
       throw new RpcException({
         message: AuthMessages.OtpCodeInvalid,
-        statusCode: HttpStatus.UNAUTHORIZED,
+        code: HttpStatus.UNAUTHORIZED,
       });
     return true;
   }

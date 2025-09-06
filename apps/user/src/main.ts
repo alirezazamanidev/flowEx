@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Transport, MicroserviceOptions } from '@nestjs/microservices';
 import { join } from 'path';
+import { RpcExceptionFilter } from '@app/common/filters/rpc-exception.filter';
 async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     AppModule,
@@ -14,6 +15,7 @@ async function bootstrap() {
       },
     },
   );
+  app.useGlobalFilters(new RpcExceptionFilter())
   await app.listen();
 
   console.log(`

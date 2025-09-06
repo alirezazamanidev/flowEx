@@ -1,29 +1,40 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Inject, OnModuleInit, Post, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpException,
+  HttpStatus,
+  Inject,
+  OnModuleInit,
+  Post,
+  Req,
+} from '@nestjs/common';
 
 import { ApiConsumes, ApiOperation } from '@nestjs/swagger';
 import { SignUpDto } from './dtos/signUp.dto';
-
 
 import { ContentTypeEnum } from '../../common/enums/form.enum';
 
 import { GrpcPackageNames } from '../../common/enums/grpc.enum';
 import { AUTH_SERVICE_NAME, AuthServiceClient } from '@app/common';
-import type{ ClientGrpc } from '@nestjs/microservices';
+import { RpcException, type ClientGrpc } from '@nestjs/microservices';
 import { SignInDto } from './dtos/signIn.dto';
 import { CheckOtpDto } from './dtos/check-otp.dto';
-import type{ Request } from 'express';
+import type { Request } from 'express';
 import { Auth } from './decorators/auth.decourator';
+import { lastValueFrom } from 'rxjs';
 
 @Controller('auth')
 export class AuthController implements OnModuleInit {
-private authServiceClient: AuthServiceClient;
+  private authServiceClient: AuthServiceClient;
 
   constructor(@Inject(GrpcPackageNames.USER) private client: ClientGrpc) {}
   onModuleInit() {
-    this.authServiceClient = this.client.getService<AuthServiceClient>(AUTH_SERVICE_NAME);
-
+    this.authServiceClient =
+      this.client.getService<AuthServiceClient>(AUTH_SERVICE_NAME);
   }
- 
+
   @ApiOperation({ summary: 'signUp' })
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
@@ -44,13 +55,14 @@ private authServiceClient: AuthServiceClient;
   @ApiConsumes(ContentTypeEnum.Form, ContentTypeEnum.Json)
   @Post('check-otp')
   checkOtp(@Body() dto: CheckOtpDto) {
-    return this.authServiceClient.checkOtp(dto);
+    
+      return this.authServiceClient.checkOtp(dto)
+   
   }
-  @ApiOperation({summary:'get user pyload'})
+  @ApiOperation({ summary: 'get user pyload' })
   @Get('/whoiam')
   @Auth()
-  userPayload(@Req() req:Request){
-    return req.user
-
+  userPayload(@Req() req: Request) {
+    return req.user;
   }
 }
